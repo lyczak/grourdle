@@ -6,7 +6,10 @@
 
 start(_Type, _Args) ->
 	Dispatch = cowboy_router:compile([
-		{'_', [{"/", hello_handler, []}]}
+		{'_', [
+			{"/", cowboy_static, {priv_file, grourdle, "index.html"}},
+			{"/assets/[...]", cowboy_static, {priv_dir, grourdle, "assets"}}
+		]}
 	]),
 	{ok, _} = cowboy:start_clear(my_http_listener,
 		[{port, 1312}],

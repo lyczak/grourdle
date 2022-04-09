@@ -31,6 +31,7 @@ _checkouts/
 .idea/**/shelf
 .idea/discord.xml
 .idea/rebar.xml
+.idea/vcs.xml
 
 # Sensitive or high-churn files
 .idea/**/dataSources/
