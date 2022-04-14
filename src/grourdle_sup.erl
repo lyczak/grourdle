@@ -8,5 +8,15 @@ start_link() ->
 	supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 init([]) ->
-	Procs = [],
-	{ok, {{one_for_one, 1, 5}, Procs}}.
+	MaxR = 1,
+	MaxT = 3000,
+	{ok, {{one_for_one, MaxR, MaxT}, [
+		{
+			sess_pool,
+			{grdl_sess_pool_sup, start_link, []},
+			permanent,
+			5000, % shutdown time
+			worker,
+			[grdl_sess_pool_sup]
+		}
+	]}}.
