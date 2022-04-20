@@ -1,6 +1,6 @@
 -module(wordle).
 -import(string,[equal/2]).
--export([check_guess/2]).
+-export([get_answer/0, check_guess/2]).
 
 %% @doc Check a Wordle guess against a provided word.
 %% @returns A tuple containing the Guess and a list of
@@ -11,6 +11,9 @@
 %%    [green,grey,grey,grey,yellow]
 %%4> wordle:check_guess("check","cheek").
 %%    [green,green,green,grey,green]
+
+get_answer() ->
+  atom.
 
 check_guess(Guess, Word) ->
 
