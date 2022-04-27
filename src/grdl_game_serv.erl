@@ -129,7 +129,7 @@ handle_call({end_round}, {Pid, _Tag},
     [] -> end_game(self());
     _ ->
       G = guess_arbiter:choose_guess(Guesses),
-      R = wordle:check_guess(G, Word),
+      R = grdl_wordle:check_guess(G, Word),
       {reply, ok, S#state{
         round_guesses = [Board | R]
       }}

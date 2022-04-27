@@ -1,4 +1,4 @@
--module(wordle).
+-module(grdl_wordle).
 -import(string,[equal/2]).
 -export([get_answer/0, check_guess/2]).
 
