@@ -35,7 +35,7 @@ init({PoolSup}) ->
 handle_call({start_session}, _From, S = #state{sup = Sup, smap = SMap, refs = Refs}) ->
   SessId = grdl_utils:unique_base64_id(?IDLENGTH, SMap),
   io:format("sess_pool_serv spawning sess_serv~n"),
-  {ok, Pid} = supervisor:start_child(Sup, []), % [] is where we'd add sess_serv args
+  {ok, Pid} = supervisor:start_child(Sup, [SessId]),
   Ref = erlang:monitor(process, Pid),
   {reply, {ok,Pid, SessId},
     S#state{smap = SMap#{SessId => Pid}, refs = gb_sets:add(Ref,Refs)}
