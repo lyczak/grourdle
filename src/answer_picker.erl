@@ -1,7 +1,7 @@
 -module(answer_picker).
 
 %% API
--export([pick_answer/0, binary_list_to_string_list/1]).
+-export([pick_answer/0]).
 
 binary_list_to_string_list(BinaryList) when length(BinaryList) == 0 -> [];
 binary_list_to_string_list(BinaryList) ->
