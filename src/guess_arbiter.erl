@@ -5,8 +5,10 @@
 
 
 %% @doc Pick/generate a Wordle guess from a list of several guesses.
-choose_guess([First | Last]) ->
-  Out = lists:nth(rand:uniform(length([First | Last])), [First | Last]),
-  io:fwrite("~s",[Out]).
+choose_guess([Guess | NextGuess]) ->
+  ChosenGuess = lists:nth(rand:uniform(length([Guess | NextGuess])), [Guess | NextGuess]),
+  io:fwrite("~s",[ChosenGuess]).
+
+
 
 
