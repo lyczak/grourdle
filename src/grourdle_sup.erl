@@ -18,5 +18,13 @@ init([]) ->
 			5000, % shutdown time
 			worker,
 			[grdl_sess_pool_sup]
+		},
+		{
+			game_pool,
+			{grdl_game_pool_sup, start_link, []},
+			permanent,
+			5000, % shutdown time
+			worker,
+			[grdl_game_pool_sup]
 		}
 	]}}.
