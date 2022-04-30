@@ -3,10 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <title>Grourdle!</title>
-    <script src="scripts/grourdle_client.js"></script>
-    <script src="scripts/grourdle_game.js"></script>
+    <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 
+<div id="welcome-container" class="container">
+    <h1>Grourdle!</h1>
+    <p>
+        <strong>Gr</strong>oup Wo<strong>rdle</strong>!
+        <br/>
+        (Made with ❤️, Erlang, and WebSockets)
+    </p>
+    <div>
+        <button id="new-game-button">Create a New Game</button>
+        <button id="join-game-button">Join an Existing Game</button>
+    </div>
+</div>
+
+<div id="board-container" class="container">
+
+</div>
+
+<script src="scripts/grourdle_client.js"></script>
+<script src="scripts/grourdle_game.js"></script>
 </body>
 </html>

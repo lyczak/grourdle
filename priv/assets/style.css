@@ -1,0 +1,31 @@
+body {
+    background-color: #2d2d2d;
+    color: #cecece;
+    font-family: Arial, sans-serif;
+}
+
+.cell {
+    border-radius: 0.1rem;
+    border-width: 0.01rem;
+    border-style: solid;
+    border-color: #d7d7d7;
+    background-color: #242424;
+    height: 2rem;
+    text-align: center;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.container {
+    width: 22rem;
+    margin: 10rem auto auto;
+}
+
+#board-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    gap: 0.4rem;
+}
