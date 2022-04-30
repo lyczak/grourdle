@@ -2,7 +2,7 @@
 -behaviour(gen_server).
 
 -export([start_link/0, bind_to_owner/1, join_game/1, leave_game/2,
-  start_game/1, submit_guess/2, end_round/1, end_game/1]).
+  start_game/1, submit_guess/2, end_round/1]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2,
   code_change/3]).
 
@@ -55,10 +55,6 @@ submit_guess(GsPid, Guess) ->
 % against the secret word. this should only be called during an active round.
 end_round(GsPid) ->
   gen_server:call(GsPid, {end_round}).
-
-%end game by setting game state to waiting, broadcast game_end
-end_game(GsPid) ->
-  gen_server:call(GsPid, {end_game}).
 
 %%%===================================================================
 %%% gen_server
@@ -143,34 +139,22 @@ handle_call({end_round}, {Pid, _Tag},
     S = #state{word = Word, board = Board, round_guesses = Round, owner = Owner})
   when Pid == Owner orelse Pid == self() ->
   Guesses = maps:values(Round),
-  _BoardSize = length(Board),
   case Guesses of
-    [] -> end_game(self());
+    [] -> self() ! {end_game, no_guesses}, {reply, ok, S};
     _ ->
       GuessChosen = guess_arbiter:choose_guess(Guesses),
       Result = grdl_wordle:check_guess(GuessChosen, Word),
       broadcast(#{event => round_ended, guess_chosen => GuessChosen, guesses => Guesses, result => Result}, S),
-%%      GameEnd = case Result of
-%%        {_, [green,green,green,green,green]} -> true;
-%%        _ when BoardSize >= ?BOARD_SIZE -> true;
-%%        _ -> false
-%%      end,
+      case Result of
+        {_, [green,green,green,green,green]} -> self() ! {end_game, won};
+        _ when length(Board) >= ?BOARD_SIZE -> self() ! {end_game, lost};
+        _ -> ok
+      end,
       {reply, ok, S#state{
         round_guesses = #{},
         board = [Board | Result]
       }}
   end;
-
-%
-%ends the game by setting game_state to waiting, informs all users
-handle_call({end_game}, {Pid, _Tag},
-    S = #state{board = Board, game_state = active, owner = Owner})
-  when Pid == Owner orelse Pid == self() ->
-  broadcast(#{event => game_ended, board => Board}, S),
-  {reply, ok, S#state{
-    game_state = waiting
-  }};
-
 
 handle_call(_Request, _From, State = #state{}) ->
   {reply, ok, State}.
@@ -180,6 +164,15 @@ handle_cast(_Request, State = #state{}) ->
   {noreply, State}.
 
 % etc
+
+%ends the game by setting game_state to waiting, informs all users
+handle_info({end_game, Reason},
+    S = #state{board = Board, game_state = active}) ->
+  broadcast(#{event => game_ended, reason => Reason, board => Board}, S),
+  {reply, ok, S#state{
+    game_state = waiting
+  }};
+
 handle_info(_Info, State = #state{}) ->
   {noreply, State}.
 
