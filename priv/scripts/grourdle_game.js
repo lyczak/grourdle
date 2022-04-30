@@ -51,14 +51,12 @@ class GrourdleGame {
     }
 
     // The game transitions from the waiting state to the active state
-    // TODO: add erlang broadcast for this event
     onGameStart(e) {
         console.log("the game has started!");
     }
 
     // A user has submitted a guess
     // { "event": "guess_submitted", "guess_count": numberOfGuesses }
-    // TODO: update erlang code to fix typo ^
     onGuessSubmitted(e) {
         console.log("another guess has been submitted. there are now: " + e.data.guess_count);
     }

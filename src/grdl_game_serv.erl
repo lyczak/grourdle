@@ -109,6 +109,7 @@ handle_call({start_game}, {Pid, _Tag},
     S = #state{owner = Owner, game_state = waiting})
   when Pid == Owner orelse Pid == self() ->
   Word = grdl_wordle:get_answer(),
+  broadcast(#{event => game_started}, S),
   {reply, ok, S#state{
     game_state = active,
     word = Word,
@@ -123,7 +124,7 @@ handle_call({submit_guess, Guess}, {Pid, _Tag}, S = #state{sess = Sess, round_gu
   case maps:find(Pid, Round) of
     {ok, _} ->
         GuessCount = maps:size(Round) + 1,
-        broadcast(#{event => guess_submitted, user_count => GuessCount}, S),
+        broadcast(#{event => guess_submitted, guess_count => GuessCount}, S),
         case maps:size(Sess) of
            GuessCount -> end_round(self());
            _ -> ok
