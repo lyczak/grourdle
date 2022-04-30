@@ -41,7 +41,7 @@ init({PoolSup}) ->
 % see start_game/0
 % start a new game server, generate a new id code, update the state and return
 handle_call({start_game}, _From, S = #state{sup = Sup, gmap = GMap, refs = Refs}) ->
-  GameId = grdl_utils:unique_base64_id(?IDLENGTH, GMap),
+  GameId = list_to_binary(io_lib:format("G~p", [gb_sets:size(Refs) + 1])),
   io:format("game_pool_serv spawning game_serv~n"),
   {ok, Pid} = supervisor:start_child(Sup, []), % [] is where we'd add sess_serv args
   Ref = erlang:monitor(process, Pid),
