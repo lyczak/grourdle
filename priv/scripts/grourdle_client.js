@@ -25,10 +25,34 @@ class GrourdleClient extends EventTarget {
         });
     }
 
-    wsSend(msg) { // todo: private
+    wsSend(msg) {
         let text = JSON.stringify(msg);
         this.#ws.send(text);
     }
+
+    // === Outgoing Messages ===
+
+    setUsername(username) {
+        this.wsSend({set_username: username});
+    }
+
+    createGame() {
+        this.wsSend({join_game: "new"});
+    }
+
+    joinGame(gameId) {
+        this.wsSend({join_game: gameId});
+    }
+
+    startGame() {
+        this.wsSend({start_game: true});
+    }
+
+    submitGuess(guess) {
+        this.wsSend({guess: guess});
+    }
+
+    // === Callbacks ===
 
     #onWsMessage(wsevent) {
         console.log("websocket event: ");
