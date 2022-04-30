@@ -7,6 +7,7 @@
   code_change/3]).
 
 -define(SERVER, ?MODULE).
+-define(BOARD_SIZE, 6).
 -record(state, {
   owner, % owner's session pid for easy access
   sess, % #{Pid1 => Monitor1 ... PidN => MonitorN}
@@ -55,8 +56,9 @@ submit_guess(GsPid, Guess) ->
 end_round(GsPid) ->
   gen_server:call(GsPid, {end_round}).
 
+%end game by setting game state to waiting, broadcast game_end
 end_game(GsPid) ->
-  gen_server:call(GsPid, {end_game}). % todo: handle end game
+  gen_server:call(GsPid, {end_game}).
 
 %%%===================================================================
 %%% gen_server
@@ -79,17 +81,23 @@ handle_call({bind_to_session}, {SsPid, _Tag}, S = #state{sess = Refs}) ->
 
 % see join_game/1
 % create a new monitor and add it to the sess refs.
+% tells all users a user has joined
 handle_call({join_game}, {Pid, _Tag}, S = #state{sess = Refs}) ->
   Ref = erlang:monitor(process, Pid),
+  UserCount = maps:size(Refs) + 1,
+  broadcast(#{event => game_joined, user_count => UserCount}, S),
   {reply, ok, S#state{
     sess = Refs#{Pid => Ref}
   }};
 
 % see leave_game/1
 % remove existing monitor and sess pid entry
+% tells all users a user has left
 handle_call({leave_game}, {Pid, _Tag}, S = #state{sess = Refs}) ->
   Ref = maps:get(Pid, Refs),
   erlang:demonitor(Ref),
+  UserCount = maps:size(Refs) - 1,
+  broadcast(#{event => game_left, user_count => UserCount}, S),
   {reply, ok, S#state{
     sess = maps:remove(Ref, Refs)
   }};
@@ -100,7 +108,7 @@ handle_call({leave_game}, {Pid, _Tag}, S = #state{sess = Refs}) ->
 handle_call({start_game}, {Pid, _Tag},
     S = #state{owner = Owner, game_state = waiting})
   when Pid == Owner orelse Pid == self() ->
-  Word = "tests", % TODO: choose a word
+  Word = grdl_wordle:get_answer(),
   {reply, ok, S#state{
     game_state = active,
     word = Word,
@@ -110,9 +118,17 @@ handle_call({start_game}, {Pid, _Tag},
 
 % see submit_guess/2
 % if session's guess not exists, add it
-handle_call({submit_guess, Guess}, {Pid, _Tag}, S = #state{round_guesses = Round}) ->
+% tells all users a guess has been submitted
+handle_call({submit_guess, Guess}, {Pid, _Tag}, S = #state{sess = Sess, round_guesses = Round}) ->
   case maps:find(Pid, Round) of
-    {ok, _} -> {reply, ok, S};
+    {ok, _} ->
+        GuessCount = maps:size(Round) + 1,
+        broadcast(#{event => guess_submitted, user_count => GuessCount}, S),
+        case maps:size(Sess) of
+           GuessCount -> end_round(self());
+           _ -> ok
+        end,
+        {reply, ok, S};
     error -> {reply, ok, S#state{
       sess = S#{Pid => Guess}
     }}
@@ -121,19 +137,39 @@ handle_call({submit_guess, Guess}, {Pid, _Tag}, S = #state{round_guesses = Round
 % see end_round/1
 % if no guesses end game, otherwise, pick a guess and update the board
 % then prepare the state for the next round
+% todo: check end game
 handle_call({end_round}, {Pid, _Tag},
     S = #state{word = Word, board = Board, round_guesses = Round, owner = Owner})
   when Pid == Owner orelse Pid == self() ->
   Guesses = maps:values(Round),
+  _BoardSize = length(Board),
   case Guesses of
     [] -> end_game(self());
     _ ->
-      G = guess_arbiter:choose_guess(Guesses),
-      R = grdl_wordle:check_guess(G, Word),
+      GuessChosen = guess_arbiter:choose_guess(Guesses),
+      Result = grdl_wordle:check_guess(GuessChosen, Word),
+      broadcast(#{event => round_ended, guess_chosen => GuessChosen, guesses => Guesses, result => Result}, S),
+%%      GameEnd = case Result of
+%%        {_, [green,green,green,green,green]} -> true;
+%%        _ when BoardSize >= ?BOARD_SIZE -> true;
+%%        _ -> false
+%%      end,
       {reply, ok, S#state{
-        round_guesses = [Board | R]
+        round_guesses = #{},
+        board = [Board | Result]
       }}
   end;
+
+%
+%ends the game by setting game_state to waiting, informs all users
+handle_call({end_game}, {Pid, _Tag},
+    S = #state{board = Board, game_state = active, owner = Owner})
+  when Pid == Owner orelse Pid == self() ->
+  broadcast(#{event => game_ended, board => Board}, S),
+  {reply, ok, S#state{
+    game_state = waiting
+  }};
+
 
 handle_call(_Request, _From, State = #state{}) ->
   {reply, ok, State}.
@@ -155,3 +191,8 @@ code_change(_OldVsn, State = #state{}, _Extra) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
+
+%%helper func that given state and message, messages all session servers
+broadcast(Msg, _S = #state{sess = Sess}) ->
+  maps:foreach(fun(Pid,_) -> grdl_sess_serv:send_message(Pid, Msg) end, Sess),
+  ok.
