@@ -13,7 +13,13 @@
 %%    [green,green,green,grey,green]
 
 get_answer() ->
-  atom.
+  "bread".
+
+check_guess(G, W) when is_binary(G) ->
+  check_guess(binary_to_list(G), W);
+
+check_guess(G, W) when is_binary(W) ->
+  check_guess(G, binary_to_list(W));
 
 check_guess(Guess, Word) ->
   Res = check_for_green(Guess, 1, Word, [grey,grey,grey,grey,grey]),
