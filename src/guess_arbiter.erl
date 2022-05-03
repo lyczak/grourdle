@@ -8,6 +8,7 @@
 -export([choose_guess/1]).
 -export([edit_distance/4]).
 -export([count_edit_distances/2]).
+-export([get_min_tuple/1]).
 
 
 
@@ -57,6 +58,19 @@ count_edit_distances(G, [Guess | NextGuess]) ->
   edit_distance(G, Guess, length(G), length(Guess)) + count_edit_distances(G, NextGuess).
 
 
+build_tuple_val_list(List) when length(List) == 0 -> [];
+build_tuple_val_list(List) ->
+  [element(2, hd(List)) | build_tuple_val_list(tl(List))].
+
+get_min_val(List) ->
+  lists:min(build_tuple_val_list(List)).
+
+get_min_tuple(List) ->
+  Val = get_min_val(List),
+  if element(2, hd(List)) == Val -> hd(List);
+    true -> get_min_tuple(tl(List))
+  end.
+
 
 %% @doc Pick/generate a Wordle guess from a list of several guesses.
 choose_guess([Guess | NextGuess]) ->
@@ -71,16 +85,6 @@ choose_guess([Guess | NextGuess]) ->
   SumED1 = count_edit_distances(G1, StringGuesses),
   SumED2 = count_edit_distances(G2, StringGuesses),
   SumED3 = count_edit_distances(G3, StringGuesses),
-  [{G1, SumED1}, {G2, SumED2}, {G3, SumED3}]. %% Take the minimum of this
-
-
-
-
-
-
-
-
-
-
-
+  Lst = [{G1, SumED1}, {G2, SumED2}, {G3, SumED3}], %% Take the minimum of this
+  get_min_tuple(Lst).
 
