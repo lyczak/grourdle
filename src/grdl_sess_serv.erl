@@ -49,15 +49,17 @@ handle_cast({ws_message, _ = #{set_username := Username}}, S = #state{}) ->
   {noreply, S#state{username = Username}};
 
 handle_cast({ws_message, _ = #{join_game := <<"new">>}}, S = #state{g_pid = undefined}) ->
-  {ok, Pid, _GameId} = grdl_game_pool_serv:start_game(),
+  {ok, Pid, GameId} = grdl_game_pool_serv:start_game(),
   grdl_game_serv:bind_to_owner(Pid),
   Ref = erlang:monitor(process, Pid),
+  send_message(self(), #{event => game_bound, game_id => GameId}),
   {noreply, S#state{g_pid = Pid, g_ref = Ref}};
 
 handle_cast({ws_message, _ = #{join_game := GameId}}, S = #state{g_pid = undefined}) ->
   {ok, Pid} = grdl_game_pool_serv:get_game(GameId),
   grdl_game_serv:join_game(Pid),
   Ref = erlang:monitor(process, Pid),
+  send_message(self(), #{event => game_bound, game_id => GameId}),
   {noreply, S#state{g_pid = Pid, g_ref = Ref}};
 
 handle_cast({ws_message, _ = #{start_game := _}}, S = #state{g_pid = Pid}) ->
