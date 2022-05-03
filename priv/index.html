@@ -20,8 +20,17 @@
     </div>
 </div>
 
-<div id="board-container" class="container">
-
+<div id="game-container" class="container" style="display: none">
+    <div id="game-header">
+        <h1>Room <span id="room-id"></span></h1>
+        <h3 id="status-header">Waiting to Start</h3>
+    </div>
+    <hr style="clear: both"/>
+    <div id="board-container" style="display: none">
+    </div>
+    <div>
+        <button id="start-game-button" style="display: none">Start Game</button>
+    </div>
 </div>
 
 <script src="scripts/grourdle_client.js"></script>

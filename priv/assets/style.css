@@ -21,11 +21,24 @@ body {
 
 .container {
     width: 22rem;
-    margin: 10rem auto auto;
+    margin: 6rem auto auto;
 }
 
 #board-container {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     gap: 0.4rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+#game-header > h1 {
+    display: inline;
+    float: left
+}
+
+#game-header > h3 {
+    display: inline;
+    float: right;
+    margin-top: 2rem;
 }
