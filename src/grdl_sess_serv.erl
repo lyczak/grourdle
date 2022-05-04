@@ -56,11 +56,16 @@ handle_cast({ws_message, _ = #{join_game := <<"new">>}}, S = #state{g_pid = unde
   {noreply, S#state{g_pid = Pid, g_ref = Ref}};
 
 handle_cast({ws_message, _ = #{join_game := GameId}}, S = #state{g_pid = undefined}) ->
-  {ok, Pid} = grdl_game_pool_serv:get_game(GameId),
-  grdl_game_serv:join_game(Pid),
-  Ref = erlang:monitor(process, Pid),
-  send_message(self(), #{event => game_bound, game_id => GameId}),
-  {noreply, S#state{g_pid = Pid, g_ref = Ref}};
+  case grdl_game_pool_serv:get_game(GameId) of
+    {error, game_not_found, _} ->
+      send_message(self(), #{event => game_unbound, reason => game_not_found}),
+      {noreply, S};
+    {ok, Pid} ->
+      grdl_game_serv:join_game(Pid),
+      Ref = erlang:monitor(process, Pid),
+      send_message(self(), #{event => game_bound, game_id => GameId}),
+      {noreply, S#state{g_pid = Pid, g_ref = Ref}}
+  end;
 
 handle_cast({ws_message, _ = #{start_game := _}}, S = #state{g_pid = Pid}) ->
   grdl_game_serv:start_game(Pid),
