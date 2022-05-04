@@ -31,14 +31,13 @@ check_guess(Guess, Word) ->
 
 %lists:nth(index,list)
 check_for_green(Guess, Index, Word, Result) ->
-  Adj_index = (5 - length(Word)) + Index,
   case Index > length(Word) of
     true -> {Guess, Word, Result};
     false ->
       G_letter = getnth(Index, Guess),
       W_letter = getnth(Index, Word),
       case G_letter =:= W_letter of
-        true -> New_result = setnth(Adj_index, Result, green),
+        true -> New_result = setnth(Index, Result, green),
           check_for_green(setnth(Index, Guess, "-"), Index, setnth(Index, Word, "_"), New_result);
         false -> check_for_green(Guess, Index + 1, Word, Result)
       end
