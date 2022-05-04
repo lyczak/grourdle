@@ -72,7 +72,7 @@ build_edit_distance_tuples([], OutList, FullList) ->
 build_edit_distance_tuples([E1 | EN], OutList, FullList) ->
   Out = lists:append(OutList, [{E1, count_edit_distances(E1, FullList)}]),
   build_edit_distance_tuples(EN, Out, FullList).
-  %%
+
 
 
 

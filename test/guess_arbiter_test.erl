@@ -41,5 +41,10 @@ count_edit_distances_test() ->
   CorrectAnswer = 12,
   ?assertEqual(CorrectAnswer, Check).
 
+choose_guess_test() ->
+  Check = guess_arbiter:choose_guess(["bread", "table", "movie", "mouse"]),
+  CorrectAnswer = "movie",
+  ?assertEqual(CorrectAnswer, Check).
+
 
 -endif.
