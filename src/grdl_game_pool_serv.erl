@@ -41,7 +41,7 @@ init({PoolSup}) ->
 % see start_game/0
 % start a new game server, generate a new id code, update the state and return
 handle_call({start_game}, _From, S = #state{sup = Sup, gmap = GMap, refs = Refs}) ->
-  GameId = list_to_binary(io_lib:format("G~p", [gb_sets:size(Refs) + 1])),
+  GameId = list_to_binary(grdl_utils:game_id(GMap)),
   io:format("game_pool_serv spawning game_serv~n"),
   {ok, Pid} = supervisor:start_child(Sup, []), % [] is where we'd add sess_serv args
   Ref = erlang:monitor(process, Pid),
@@ -71,13 +71,16 @@ handle_cast(_Request, State = #state{}) ->
 
 % handle process monitor down signal
 % this means one of the game servers went down
-handle_info({'DOWN', Ref, process, Pid, _}, S = #state{refs=Refs}) ->
-  io:format("received down msg~n"),
+handle_info({'DOWN', Ref, process, Pid, _}, S = #state{refs = Refs, gmap = GMap}) ->
   case gb_sets:is_element(Ref, Refs) of
     true ->
-      io:format("game server ~p just went down~n", [Pid]); % todo: handle for real
-%%      handle_down_worker(Ref, S);
-    false -> %% Not our responsibility
+      io:format("i'm a pool_serv and my game_serv just went down~n"),
+      erlang:demonitor(Ref),
+      {noreply, S#state{
+        refs = gb_sets:delete(Ref, Refs),
+        gmap = maps:filter(fun(_, P) -> P == Pid end, GMap)
+      }};
+    false ->
       {noreply, S}
   end;
 
