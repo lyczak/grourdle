@@ -2,6 +2,22 @@
 -import(string,[equal/2]).
 -export([get_answer/0, check_guess/2]).
 
+make_answers_list() ->
+  PrivDir = case code:priv_dir(grourdle) of
+    {error, bad_name} ->
+      "priv";
+    P ->
+      P
+  end,
+  {ok, File} = file:read_file(filename:join([PrivDir, "possible_answers.json"])),
+  jsx:decode(File).
+
+get_answer() ->
+  List = make_answers_list(),
+  R0 = rand:uniform(length(List)),
+  binary_to_list(lists:nth(R0, List)).
+
+
 %% @doc Check a Wordle guess against a provided word.
 %% @returns A tuple containing the Guess and a list of
 %% colors based on where the letters appear in the provided Word.
@@ -11,9 +27,6 @@
 %%    [green,grey,grey,grey,yellow]
 %%4> wordle:check_guess("check","cheek").
 %%    [green,green,green,grey,green]
-
-get_answer() ->
-  "bread".
 
 check_guess(G, W) when is_binary(G) ->
   check_guess(binary_to_list(G), W);
