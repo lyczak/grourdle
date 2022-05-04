@@ -165,7 +165,7 @@ handle_info({end_round},
         result => Result}, S),
       case Result of
         [green,green,green,green,green] -> self() ! {end_game, won};
-        _ when length(Board) >= ?BOARD_SIZE -> self() ! {end_game, lost};
+        _ when length(Board) >= ?BOARD_SIZE - 1 -> self() ! {end_game, lost};
         _ -> ok
       end,
       {noreply, S#state{
