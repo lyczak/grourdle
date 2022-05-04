@@ -189,7 +189,7 @@ handle_info({end_round},
         guesses => Guesses,
         result => Result}, S),
       case Result of
-        {_, [green,green,green,green,green]} -> self() ! {end_game, won};
+        [green,green,green,green,green] -> self() ! {end_game, won};
         _ when length(Board) >= ?BOARD_SIZE -> self() ! {end_game, lost};
         _ -> ok
       end,
@@ -203,6 +203,7 @@ handle_info({end_round},
 %ends the game by setting game_state to waiting, informs all users
 handle_info({end_game, Reason},
     S = #state{board = Board, game_state = active}) ->
+  io:format("game_serv ending game for reason ~p~n", [Reason]),
   broadcast(#{event => game_ended, reason => Reason, board => Board}, S),
   {noreply, S#state{
     game_state = waiting
