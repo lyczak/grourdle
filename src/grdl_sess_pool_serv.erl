@@ -57,13 +57,16 @@ handle_cast(_Request, State = #state{}) ->
   {noreply, State}.
 
 % info
-handle_info({'DOWN', Ref, process, Pid, _}, S = #state{refs=Refs}) ->
-  io:format("received down msg~n"),
+handle_info({'DOWN', Ref, process, Pid, _}, S = #state{refs = Refs, smap = SMap}) ->
   case gb_sets:is_element(Ref, Refs) of
     true ->
-      io:format("session server ~p just went down~n", [Pid]); % todo: handle for real
-%%      handle_down_worker(Ref, S);
-    false -> %% Not our responsibility
+      io:format("i'm a pool_serv and my sess_serv just went down~n"),
+      erlang:demonitor(Ref),
+      {noreply, S#state{
+        refs = gb_sets:delete(Ref, Refs),
+        smap = maps:filter(fun(_, P) -> P == Pid end, SMap)
+      }};
+    false ->
       {noreply, S}
   end;
 
