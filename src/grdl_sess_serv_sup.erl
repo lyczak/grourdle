@@ -14,7 +14,7 @@ init([]) ->
     {
       sess_serv,
       {grdl_sess_serv, start_link, []},
-      temporary, % todo: transient?
+      temporary,
       5000,
       worker,
       [grdl_sess_serv]

@@ -141,31 +141,6 @@ handle_call({submit_guess, Guess}, {Pid, _Tag}, S = #state{sess = Sess, round_gu
     }}
   end;
 
-% see end_round/1
-% if no guesses end game, otherwise, pick a guess and update the board
-% then prepare the state for the next round
-% todo: check end game
-%%handle_call({end_round}, {Pid, _Tag},
-%%    S = #state{word = Word, board = Board, round_guesses = Round, owner = Owner})
-%%  when Pid == Owner orelse Pid == self() ->
-%%  Guesses = maps:values(Round),
-%%  case Guesses of
-%%    [] -> self() ! {end_game, no_guesses}, {reply, ok, S};
-%%    _ ->
-%%      GuessChosen = guess_arbiter:choose_guess(Guesses),
-%%      Result = grdl_wordle:check_guess(GuessChosen, Word),
-%%      broadcast(#{event => round_ended, guess_chosen => GuessChosen, guesses => Guesses, result => Result}, S),
-%%      case Result of
-%%        {_, [green,green,green,green,green]} -> self() ! {end_game, won};
-%%        _ when length(Board) >= ?BOARD_SIZE -> self() ! {end_game, lost};
-%%        _ -> ok
-%%      end,
-%%      {reply, ok, S#state{
-%%        round_guesses = #{},
-%%        board = [Board | Result]
-%%      }}
-%%  end;
-
 handle_call(_Request, _From, State = #state{}) ->
   {reply, ok, State}.
 

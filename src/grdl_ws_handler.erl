@@ -66,7 +66,8 @@ handle_message(#{start_session := true}, S = #state{sess_pid = undefined}) ->
   grdl_sess_serv:bind_to_ws(Pid, self()),
   Msg = #{event => session_bound, sess_id => SessId},
   websocket_send(self(), Msg),
-  {ok, S#state{sess_pid = Pid, sess_ref = Ref}}; % todo: maybe reduce code duplication here
+  {ok, S#state{sess_pid = Pid, sess_ref = Ref}};
+
 handle_message(#{bind_session := SessId}, S = #state{sess_pid = undefined}) ->
   io:format("ws_handler bind to existing session:~n"),
   {ok, Pid} = grdl_sess_pool_serv:get_session(SessId), % todo: handle invalid SessId
@@ -75,10 +76,15 @@ handle_message(#{bind_session := SessId}, S = #state{sess_pid = undefined}) ->
   Msg = #{event => session_bound, sess_id => SessId},
   websocket_send(self(), Msg),
   {ok, S#state{sess_pid = Pid, sess_ref = Ref}};
+
+handle_message(#{keepalive := _}, S = #state{}) ->
+  {ok, S};
+
 handle_message(Msg, S = #state{sess_pid = SPid}) when is_pid(SPid) ->
   io:format("ws_handler passing to session ~p~n", [Msg]),
   grdl_sess_serv:handle_message(SPid, Msg),
   {ok, S};
+
 handle_message(Msg, State) ->
   io:format("ws_handler unknown message ~p~n", [Msg]),
   {ok, State}.
