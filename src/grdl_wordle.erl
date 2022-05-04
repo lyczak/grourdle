@@ -39,21 +39,21 @@ check_for_green(Guess, Index, Word, Result) ->
       W_letter = getnth(Index, Word),
       case G_letter =:= W_letter of
         true -> New_result = setnth(Adj_index, Result, green),
-          check_for_green(lists:delete(G_letter, Guess), Index, lists:delete(W_letter, Word), New_result);
+          check_for_green(setnth(Index, Guess, "-"), Index, setnth(Index, Word, "_"), New_result);
         false -> check_for_green(Guess, Index + 1, Word, Result)
       end
   end.
 
 check_for_yellow(Guess, Index, Word, Result) ->
-  Adj_index = (5 - length(Word)) + Index,
   case Index > length(Word) of
     true -> {Guess, Word, Result};
     false ->
       G_letter = getnth(Index, Guess),
-      case lists:member(G_letter, Word) of
+      case (lists:member(G_letter, Word) andalso getnth(Index, Result) =:= grey) of
         true ->
-          New_result = setnth(Adj_index, Result, yellow),
-          check_for_yellow(lists:delete(G_letter, Guess), Index, lists:delete(G_letter, Word), New_result);
+          New_result = setnth(Index, Result, yellow),
+          W_ind = index_of(G_letter, Word),
+          check_for_yellow(setnth(Index, Guess, "-"), Index, setnth(W_ind, Word, "_"), New_result);
         false -> check_for_yellow(Guess, Index + 1, Word, Result)
       end
   end.
@@ -64,3 +64,9 @@ setnth(I, [E|Rest], New) -> [E|setnth(I-1, Rest, New)].
 
 getnth(1, [N|_]) -> N;
 getnth(I, [_|Rest]) -> getnth(I-1, Rest).
+
+index_of(Item, List) -> index_of(Item, List, 1).
+
+index_of(_, [], _)  -> not_found;
+index_of(Item, [Item|_], Index) -> Index;
+index_of(Item, [_|Tl], Index) -> index_of(Item, Tl, Index+1).
