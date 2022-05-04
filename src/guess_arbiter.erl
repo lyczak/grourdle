@@ -3,7 +3,7 @@
 -import(lists,[min/1]).
 
 -export([minimum/3, list_to_variable/2, pick_min_edit_distance_sum/2,
-  choose_guess/1, edit_distance/4, count_edit_distances/2, get_min_tuple/1]).
+  choose_guess/1, edit_distance/4, count_edit_distances/2, get_min_tuple/1, build_edit_distance_tuples/3]).
 
 minimum(X, Y, Z)  ->
   ValueList = [X, Y, Z],
@@ -64,18 +64,32 @@ get_min_tuple(List) ->
   end.
 
 
+
+
+build_edit_distance_tuples([], OutList, FullList) ->
+  FullList,
+  OutList;
+build_edit_distance_tuples([E1 | EN], OutList, FullList) ->
+  Out = lists:append(OutList, [{E1, count_edit_distances(E1, FullList)}]),
+  build_edit_distance_tuples(EN, Out, FullList).
+  %%
+
+
+
 %% @doc Pick/generate a Wordle guess from a list of several guesses.
 choose_guess([Guess | NextGuess]) ->
-  %%ChosenGuess = lists:nth(rand:uniform(length([Guess | NextGuess])), [Guess | NextGuess]),
-  %%io:fwrite("~s",[ChosenGuess]).
 
-  StringGuessesEmpty = [],
-  StringGuesses = list_to_variable([Guess | NextGuess], StringGuessesEmpty),
-  G1 = lists:nth(1, StringGuesses),
-  G2 = lists:nth(2, StringGuesses),
-  G3 = lists:nth(3, StringGuesses),
-  SumED1 = count_edit_distances(G1, StringGuesses),
-  SumED2 = count_edit_distances(G2, StringGuesses),
-  SumED3 = count_edit_distances(G3, StringGuesses),
-  Lst = [{G1, SumED1}, {G2, SumED2}, {G3, SumED3}], %% Take the minimum of this
-  get_min_tuple(Lst).
+  EList1 = [],
+  EList = [],
+  FullList = list_to_variable([Guess | NextGuess], EList1),
+  RecursiveLst = build_edit_distance_tuples([Guess | NextGuess], EList, FullList),
+  ChosenGuess = lists:nth(1, tuple_to_list(get_min_tuple(RecursiveLst))),
+  ChosenGuess.
+
+  %%MinTuple = get_min_tuple(RecursiveLst), %%uncomment these two lines to be able to check the minimum tuple that contains the chosen guess and its sum edit distances from the other guesses
+  %%MinTuple.
+
+
+
+
+
