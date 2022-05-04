@@ -11,11 +11,11 @@ class GrourdleClient extends EventTarget {
         this.#ws.onmessage = this.#onWsMessage;
         this.#addEventListeners();
 
-        // let send = this.send;
-        // setInterval(function(){
-        //     let date = new Date();
-        //     send({"keepalive" : date.getTime()});
-        //     }, 30000);
+        let ws = this.#ws;
+        setInterval(function(){
+            let date = new Date();
+            ws.send(JSON.stringify({"keepalive" : date.getTime()}));
+            }, 30000);
     }
 
     #addEventListeners() {
@@ -55,8 +55,8 @@ class GrourdleClient extends EventTarget {
     // === Callbacks ===
 
     #onWsMessage(wsevent) {
-        console.log("websocket event: ");
-        console.log(wsevent); // todo: eventually remove unnecessary log statements
+        // console.log("websocket event: ");
+        // console.log(wsevent); // todo: eventually remove unnecessary log statements
 
         if(!wsevent.data)
             return;
@@ -64,8 +64,8 @@ class GrourdleClient extends EventTarget {
             let msg = JSON.parse(wsevent.data)
             let e = new Event(msg.event);
             e.data = msg;
-            console.log("dispatching event: ");
-            console.log(e);
+            // console.log("dispatching event: ");
+            console.log(msg);
             this.grourdle.dispatchEvent(e); // this = WebSocket
         } catch (e) {
             console.log("failed to parse wsevent data.")
