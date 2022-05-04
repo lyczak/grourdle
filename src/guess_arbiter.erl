@@ -57,14 +57,17 @@ build_tuple_val_list(List) ->
 get_min_val(List) ->
   lists:min(build_tuple_val_list(List)).
 
-get_min_tuple(List) ->
-  Val = get_min_val(List),
-  if element(2, hd(List)) == Val -> hd(List);
-    true -> get_min_tuple(tl(List))
+make_min_tuple_list(List, MinVal) ->
+  if length(List) =:= 0 -> [];
+    element(2, hd(List)) == MinVal -> [hd(List)] ++ make_min_tuple_list(tl(List), MinVal);
+    true -> make_min_tuple_list(tl(List), MinVal)
   end.
 
-
-
+get_min_tuple(List) ->
+  MinVal = get_min_val(List),
+  TupleLst = make_min_tuple_list(List, MinVal),
+  R0 = rand:uniform(length(TupleLst)),
+  lists:nth(R0, TupleLst).
 
 build_edit_distance_tuples([], OutList, FullList) ->
   FullList,
@@ -72,9 +75,6 @@ build_edit_distance_tuples([], OutList, FullList) ->
 build_edit_distance_tuples([E1 | EN], OutList, FullList) ->
   Out = lists:append(OutList, [{E1, count_edit_distances(E1, FullList)}]),
   build_edit_distance_tuples(EN, Out, FullList).
-
-
-
 
 %% @doc Pick/generate a Wordle guess from a list of several guesses.
 choose_guess([Guess | NextGuess]) ->
