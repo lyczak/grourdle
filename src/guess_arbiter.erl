@@ -2,20 +2,12 @@
 
 -import(lists,[min/1]).
 
--export([minimum/3]).
--export([list_to_stringlist/2]).
--export([pick_min_edit_distance_sum/2]).
--export([choose_guess/1]).
--export([edit_distance/4]).
--export([count_edit_distances/2]).
--export([get_min_tuple/1]).
-
-
+-export([minimum/3, list_to_variable/2, pick_min_edit_distance_sum/2,
+  choose_guess/1, edit_distance/4, count_edit_distances/2, get_min_tuple/1]).
 
 minimum(X, Y, Z)  ->
   ValueList = [X, Y, Z],
   min(ValueList).
-
 
 edit_distance(String1, String2, Len1, Len2) ->
 
@@ -36,8 +28,8 @@ edit_distance(String1, String2, Len1, Len2) ->
   end.
 
 
-list_to_stringlist([], OutList) -> OutList;
-list_to_stringlist([E1 | EN], OutList) ->
+list_to_variable([], OutList) -> OutList;
+list_to_variable([E1 | EN], OutList) ->
   EN,
   Out = lists:append([E1 | EN], OutList),
   Out.
@@ -78,7 +70,7 @@ choose_guess([Guess | NextGuess]) ->
   %%io:fwrite("~s",[ChosenGuess]).
 
   StringGuessesEmpty = [],
-  StringGuesses = list_to_stringlist([Guess | NextGuess], StringGuessesEmpty),
+  StringGuesses = list_to_variable([Guess | NextGuess], StringGuessesEmpty),
   G1 = lists:nth(1, StringGuesses),
   G2 = lists:nth(2, StringGuesses),
   G3 = lists:nth(3, StringGuesses),
@@ -87,4 +79,3 @@ choose_guess([Guess | NextGuess]) ->
   SumED3 = count_edit_distances(G3, StringGuesses),
   Lst = [{G1, SumED1}, {G2, SumED2}, {G3, SumED3}], %% Take the minimum of this
   get_min_tuple(Lst).
-
