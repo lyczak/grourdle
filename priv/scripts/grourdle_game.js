@@ -11,6 +11,7 @@ class GrourdleGame {
     BLUE = "#27397b"
 
     // properties
+    isOwner = false;
     client;
     state;
     userCount = 1;
@@ -36,13 +37,13 @@ class GrourdleGame {
                 welcomeContainer.style.display = "none";
                 document.getElementById("start-game-button").style.display = "block";
                 client.createGame();
+                client.game.isOwner = true;
             });
         document.querySelector("#join-game-button")
             .addEventListener("click", (e) => {
                 welcomeContainer.style.display = "none";
                 let gid = prompt("Please enter the game-id:");
                 client.joinGame(gid);
-
             });
         document.getElementById("start-game-button")
             .addEventListener("click", (e) => {
@@ -53,7 +54,7 @@ class GrourdleGame {
         let game = this;
         game.setupBoard();
         document.addEventListener("keydown", (e) => {
-            // if (game.state !== "active") return;
+            if (game.state !== "active") return;
 
             const cell = document.getElementById("cell" + game.cellIndex);
             const key = e.key;
@@ -92,6 +93,7 @@ class GrourdleGame {
     #addEventListeners() {
         this.client.addEventListener("game_state_updated", this.onStateUpdated);
         this.client.addEventListener("game_bound", this.onGameBound);
+        this.client.addEventListener("game_unbound", this.onGameUnbound);
         this.client.addEventListener("game_joined", this.onGameJoined);
         this.client.addEventListener("game_left", this.onGameLeft);
         this.client.addEventListener("game_started", this.onGameStart);
@@ -116,6 +118,7 @@ class GrourdleGame {
         g.board = d.board;
         g.guesses = d.board_guesses;
         g.userCount = d.user_count;
+        g.cellIndex = g.guesses.length * 5;
 
         g.clearBoard();
         for (let i = 0; i < g.guesses.length; i++) {
@@ -140,6 +143,14 @@ class GrourdleGame {
         // this.game.setStatus("Waiting to Start");
     }
 
+    // We have lost our game!
+    // { "event": "game_unbound", "reason": someReason }
+    onGameUnbound(e) {
+        console.log("our game has come unbound for the following reason: " + e.data.reason);
+        alert("This current room has closed!");
+        window.location.reload(); // easiest thing to do at this point is just restart, sending user back to lobby
+    }
+
     // A single user joins the game we are currently in (could also have been us).
     // { "event": "game_joined", "user_count": numberOfUsers }
     onGameJoined(e) {
@@ -158,6 +169,9 @@ class GrourdleGame {
     onGameStart(e) {
         console.log("the game has started!");
         document.getElementById("board-container").style.display = "";
+        this.game.resetLocalState();
+        this.game.clearBoard();
+        this.game.state = this.game.ACTIVE;
         this.game.setGuessCount(0);
     }
 
@@ -189,10 +203,25 @@ class GrourdleGame {
     }
 
     // the game transitions from the active state to the waiting state
-    // { "event": "game_ended", "board": [result1, result2] }
+    // { "event": "game_ended", "board": [result1, result2], "reason": "won"/"lost" }
     onGameEnd(e) {
         console.log("the game has ended! here is the board: " + e.data.board);
-        this.game.setStatus("Game Over!")
+        this.game.state = this.WAITING;
+        switch (e.data.reason) {
+            case "won":
+                this.game.setStatus("You won!");
+                break;
+            case "lost":
+                this.game.setStatus("You lost!");
+                break;
+            default:
+                this.game.setStatus("Game over!");
+        }
+
+        if (this.game.isOwner) {
+            document.getElementById("start-game-button").innerText = "Play Again";
+            document.getElementById("start-game-button").style.display = "block";
+        }
     }
 
     // === Utility ===
@@ -221,13 +250,14 @@ class GrourdleGame {
         return document.getElementById("cell" + i);
     }
 
-    clearRow(row) {
-        let b = row * 5;
-        for (let i = 0; i < 5; i++) {
-            this.getCell(b + i).textContent = "";
-        }
+    resetLocalState() {
+        this.cellIndex = 0;
+        this.guess = "";
+        this.guesses = [];
+        this.board = [];
     }
 
+    // clear board and reset
     clearBoard() {
         for (let i = 0; i < 6; i++) {
             this.clearRow(i);
@@ -239,6 +269,13 @@ class GrourdleGame {
         for (let i = 0; i < 5; i++) {
             fun(this.getCell(b + i), i);
         }
+    }
+
+    clearRow(row) {
+        this.foreachInRow(row, (r, i) => {
+            r.textContent = "";
+            r.style.backgroundColor = "";
+        })
     }
 
     setRowColors(row, colors) {
