@@ -208,6 +208,22 @@ handle_info({end_game, Reason},
     game_state = waiting
   }};
 
+handle_info({'DOWN', _Ref, process, Pid, _}, S = #state{owner = Owner, sess = Sess}) ->
+  case Pid of
+    Owner ->
+      io:format("i'm a game_serv and my owner just left~n"),
+      broadcast(#{event => game_unbound, reason => owner_left}, S),
+      exit(normal),
+      {noreply, S};
+    _ ->
+      case maps:is_key(Pid, Sess) of
+        true ->
+          {reply, ok, NewState} = handle_call({leave_game}, {Pid, tag}, S),
+          {noreply, NewState};
+        false -> {noreply, S}
+      end
+  end;
+
 handle_info(_Info, State = #state{}) ->
   {noreply, State}.
 

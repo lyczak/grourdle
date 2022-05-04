@@ -78,6 +78,19 @@ handle_cast(_Request, State = #state{}) ->
   {noreply, State}.
 
 % etc
+handle_info({'DOWN', _Ref, process, Pid, Reason}, S = #state{g_pid = Game, ws_pid = WS}) ->
+  case Pid of
+    Game ->
+      io:format("i'm a sess_serv and my game_serv just went down~n"),
+      grdl_ws_handler:websocket_send(WS, #{event => game_unbound, reason => Reason}),
+      {noreply, S};
+    WS ->
+      io:format("i'm a sess_serv and my ws_handler just went down~n"),
+      exit(normal),
+      {noreply, S};
+    _ -> {noreply, S}
+  end;
+
 handle_info(_Info, State = #state{}) ->
   {noreply, State}.
 
