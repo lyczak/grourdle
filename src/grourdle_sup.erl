@@ -4,9 +4,11 @@
 -export([start_link/0]).
 -export([init/1]).
 
+%% @doc spawn and link to <?>
 start_link() ->
 	supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
+%% @doc intilize children templates in a one-for-one scheme, make restarts 1 per 3 seconds.
 init([]) ->
 	MaxR = 1,
 	MaxT = 3000,

@@ -3,13 +3,13 @@
 
 -export([start_link/0, init/1]).
 
-% spawn and link to a new game pool supervisor
+%% @doc spawn and link to a new game pool supervisor
 start_link() ->
   io:format("game_pool_sup start_link~n"),
   supervisor:start_link(?MODULE, []).
 
-% initialize a game pool supervisor with a game pool server
-% the game server supervisor will be added dynamically by the pool server
+%% @doc initialize a game pool supervisor with a game pool server
+%% the game server supervisor will be added dynamically by the game pool server
 init([]) ->
   MaxR = 1,
   MaxT = 3000,
