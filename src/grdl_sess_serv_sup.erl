@@ -5,7 +5,7 @@
 
 start_link() ->
   io:format("sess_serv_sup start_link pid: ~p~n", [self()]),
-  supervisor:start_link(?MODULE, []).
+  supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 init([]) ->
   MaxR = 1,

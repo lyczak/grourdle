@@ -5,7 +5,7 @@
 
 start_link() ->
   io:format("sess_pool_sup start_link~n"),
-  supervisor:start_link(?MODULE, []).
+  supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 init([]) ->
   MaxR = 1,

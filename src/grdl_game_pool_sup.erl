@@ -6,7 +6,7 @@
 % spawn and link to a new game pool supervisor
 start_link() ->
   io:format("game_pool_sup start_link~n"),
-  supervisor:start_link(?MODULE, []).
+  supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 % initialize a game pool supervisor with a game pool server
 % the game server supervisor will be added dynamically by the pool server
