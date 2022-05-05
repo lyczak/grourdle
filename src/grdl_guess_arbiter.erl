@@ -85,6 +85,13 @@ build_edit_distance_tuples([E1 | EN], OutList, FullList) ->
   Out = lists:append(OutList, [{E1, count_edit_distances(E1, FullList)}]),
   build_edit_distance_tuples(EN, Out, FullList).
 
+choose_guess(Guesses = [First | _]) when is_binary(First) ->
+  list_to_binary(
+    choose_guess(
+      lists:map(
+        fun(G) -> binary_to_list(G) end,
+        Guesses)));
+
 %% @doc Pick/generate a Wordle guess from a list of several guesses.
 choose_guess([Guess | NextGuess]) ->
 
