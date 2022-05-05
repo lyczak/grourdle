@@ -149,6 +149,9 @@ help::
 		"  help          Display this help and exit" \
 		"  erlang-mk     Update erlang.mk to the latest version"
 
+docs:
+	erl -noshell -run edoc_run application "'$(APP_NAME)'" \
+            '"."' '[{def,{vsn,"$(VSN)"}}]'
 # Core functions.
 
 empty :=
