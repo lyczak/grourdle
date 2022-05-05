@@ -156,7 +156,7 @@ handle_info({end_round},
   case Guesses of
     [] -> self() ! {end_game, no_guesses}, {reply, ok, S};
     _ ->
-      GuessChosen = guess_arbiter:choose_guess(Guesses),
+      GuessChosen = grdl_guess_arbiter:choose_guess(Guesses),
       Result = grdl_wordle:check_guess(GuessChosen, Word),
       broadcast(#{
         event => round_ended,

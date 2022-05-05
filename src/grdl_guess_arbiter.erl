@@ -1,4 +1,4 @@
--module(guess_arbiter).
+-module(grdl_guess_arbiter).
 
 -export([choose_guess/1]).
 
