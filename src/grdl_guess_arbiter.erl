@@ -1,6 +1,8 @@
 -module(grdl_guess_arbiter).
 
--export([choose_guess/1]).
+-export([choose_guess/1, edit_distance/2, list_to_variable/2, count_edit_distances/2, build_edit_distance_tuples/3]).
+
+
 
 %minimum(X, Y, Z)  ->
 %  ValueList = [X, Y, Z],

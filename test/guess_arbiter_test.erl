@@ -4,29 +4,14 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
-minimum_test() ->
-  Check = grdl_guess_arbiter:minimum(10, 4, 342),
-  CorrectAnswer = 4,
-  ?assertEqual(CorrectAnswer, Check).
-
 edit_distance_basic_test() ->
   CorrectAnswer = 4,
-  Check = grdl_guess_arbiter:edit_distance("table", "movie", 5, 5),
+  Check = grdl_guess_arbiter:edit_distance("table", "movie"),
   ?assertEqual(CorrectAnswer, Check).
 
 edit_distance_same_two_strings_test() ->
   CorrectAnswer = 0,
-  Check = grdl_guess_arbiter:edit_distance("table", "table", 5, 5),
-  ?assertEqual(CorrectAnswer, Check).
-
-edit_distance_first_string_shorter_test() ->
-  CorrectAnswer = 3,
-  Check = grdl_guess_arbiter:edit_distance("tab", "table", 3, 5),
-  ?assertEqual(CorrectAnswer, Check).
-
-edit_distance_second_string_shorter_test() ->
-  CorrectAnswer = 3,
-  Check = grdl_guess_arbiter:edit_distance("table", "tab", 5, 3),
+  Check = grdl_guess_arbiter:edit_distance("table", "table"),
   ?assertEqual(CorrectAnswer, Check).
 
 list_to_variable_test() ->
@@ -38,13 +23,12 @@ list_to_variable_test() ->
 count_edit_distances_test() ->
   ListStrings = ["bread", "table", "mouse", "movie"],
   Check = grdl_guess_arbiter:count_edit_distances(lists:nth(3, ListStrings), ListStrings),
-  CorrectAnswer = 12,
+  CorrectAnswer = 11,
   ?assertEqual(CorrectAnswer, Check).
 
 choose_guess_test() ->
-  Check = grdl_guess_arbiter:choose_guess(["bread", "table", "movie", "mouse"]),
-  CorrectAnswer = "movie",
+  Check = grdl_guess_arbiter:choose_guess(["bread", "table", "movie", "hands"]),
+  CorrectAnswer = "table",
   ?assertEqual(CorrectAnswer, Check).
-
 
 -endif.
