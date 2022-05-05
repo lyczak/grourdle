@@ -1,32 +1,41 @@
 -module(guess_arbiter).
 
--import(lists,[min/1]).
+-export([choose_guess/1]).
 
--export([minimum/3, list_to_variable/2, pick_min_edit_distance_sum/2,
-  choose_guess/1, edit_distance/4, count_edit_distances/2, get_min_tuple/1, build_edit_distance_tuples/3]).
+%minimum(X, Y, Z)  ->
+%  ValueList = [X, Y, Z],
+%  lists:min(ValueList).
 
-minimum(X, Y, Z)  ->
-  ValueList = [X, Y, Z],
-  min(ValueList).
+%edit_distance(String1, String2, Len1, Len2) ->
+%  if
+%    Len1 == 0 ->
+%      Len2;
+%    Len2 == 0 ->
+%      Len1;
+%    true ->
+%      C1 = lists:sublist(String1, Len1, Len1),
+%      C2 = lists:sublist(String2, Len2, Len2),
+%
+%      if
+%        C1 == C2 -> edit_distance(String1, String2, Len1 - 1, Len2 - 1);
+%        true -> 1 + minimum(edit_distance(String1, String2, Len1, Len2 - 1), edit_distance(String1, String2, Len1 - 1, Len2), edit_distance(String1, String2, Len1 - 1, Len2 - 1))
+%      end
+%  end.
 
-edit_distance(String1, String2, Len1, Len2) ->
 
+edit_distance(First,Second) ->
+  compare(First,Second).
 
-  if
-    Len1 == 0 ->
-      Len2;
-    Len2 == 0 ->
-      Len1;
-    true ->
-      C1 = lists:sublist(String1, Len1, Len1),
-      C2 = lists:sublist(String2, Len2, Len2),
+compare(First,Second) ->
+  if length(First) == 0 ->
+    length(Second);
+    length(Second) == 0 ->
+      length(First);
 
-      if
-        C1 == C2 -> edit_distance(String1, String2, Len1 - 1, Len2 - 1);
-        true -> 1 + minimum(edit_distance(String1, String2, Len1, Len2 - 1), edit_distance(String1, String2, Len1 - 1, Len2), edit_distance(String1, String2, Len1 - 1, Len2 - 1))
-      end
+    hd(First) == hd(Second) ->
+      compare(tl(First),tl(Second));
+    true -> 1 + lists:min([compare(First,tl(Second)),compare(tl(First),Second),compare(tl(First),tl(Second))])
   end.
-
 
 list_to_variable([], OutList) -> OutList;
 list_to_variable([E1 | EN], OutList) ->
@@ -34,12 +43,12 @@ list_to_variable([E1 | EN], OutList) ->
   Out = lists:append([E1 | EN], OutList),
   Out.
 
-pick_min_edit_distance_sum([], Index) -> Index;
-pick_min_edit_distance_sum([ED1 | EDN], Index)  ->
-  if
-    EDN < ED1 -> Index = Index+1;
-    true -> pick_min_edit_distance_sum(EDN, Index)
-  end.
+%pick_min_edit_distance_sum([], Index) -> Index;
+%pick_min_edit_distance_sum([ED1 | EDN], Index)  ->
+%  if
+%    EDN < ED1 -> Index = Index+1;
+%    true -> pick_min_edit_distance_sum(EDN, Index)
+%  end.
 
 
 count_edit_distances(G, []) ->
@@ -47,7 +56,7 @@ count_edit_distances(G, []) ->
   0;
 count_edit_distances(G, [Guess | NextGuess]) ->
   %%lists:append([edit_distance(G, Guess, length(G), length(Guess))], [count_edit_distances(G, NextGuess)]).
-  edit_distance(G, Guess, length(G), length(Guess)) + count_edit_distances(G, NextGuess).
+  edit_distance(G, Guess) + count_edit_distances(G, NextGuess).
 
 
 build_tuple_val_list(List) when length(List) == 0 -> [];
