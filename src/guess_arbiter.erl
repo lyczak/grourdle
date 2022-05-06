@@ -2,6 +2,8 @@
 
 -export([choose_guess/1]).
 
+
+
 %minimum(X, Y, Z)  ->
 %  ValueList = [X, Y, Z],
 %  lists:min(ValueList).
@@ -22,7 +24,11 @@
 %      end
 %  end.
 
-
+%% @doc Calculates the editdistance from one string to another by calculating the number of character insertions, deletions, and moves it takes to change the first string to the second.
+%% The edit_distance function itself calls compare on the the parameter strings to compare the character changes from the first string to the second string.
+%% @param First, the first string used to measure the edit distance to a different string.
+%% @param Second, the second string used for the end of the edit distance calculation.
+%% @return Returns a number (int) that is the total number of character insertions, deletions, and moves to change the first string to the second.
 edit_distance(First,Second) ->
   compare(First,Second).
 
@@ -36,7 +42,12 @@ compare(First,Second) ->
       compare(tl(First),tl(Second));
     true -> 1 + lists:min([compare(First,tl(Second)),compare(tl(First),Second),compare(tl(First),tl(Second))])
   end.
-
+%% @doc Takes in a list that is recursively defined and assigns it to a variable.
+%% Servers mostly an organizational purpose for creating a variable that contains a list of the current rounds guesses.
+%% @param [], check for when the orginal list is done iterating through
+%% @param OutList, the output variable that the input list is assigned to
+%% @param [E1 | EN], the input list that is labeled as E1 for element 1 and EN for Elements...N
+%% @return Out, variable that the input list is assigned to
 list_to_variable([], OutList) -> OutList;
 list_to_variable([E1 | EN], OutList) ->
   EN,
@@ -50,7 +61,11 @@ list_to_variable([E1 | EN], OutList) ->
 %    true -> pick_min_edit_distance_sum(EDN, Index)
 %  end.
 
-
+%% @doc Takes in one players guess, and sums the edit distances to each of the other guesses.
+%% @param G, The Guess specified to have the edit distance to all the other guesses summed.
+%% @param [], End of list check.
+%% @param [Guess | NextGuess], Inputted list of each players guess.
+%% @return Number (int) of the sum of the edit distances from G to [Guess | NextGuess] (list of guesses).
 count_edit_distances(G, []) ->
   G,
   0;
@@ -58,26 +73,45 @@ count_edit_distances(G, [Guess | NextGuess]) ->
   %%lists:append([edit_distance(G, Guess, length(G), length(Guess))], [count_edit_distances(G, NextGuess)]).
   edit_distance(G, Guess) + count_edit_distances(G, NextGuess).
 
-
+%% @doc Builds a list of tuples containing each guess and the sum of edit distances to the other guesses.
+%% @param List, List to be converted to a list of tuples.
+%% @return List of tuples containing edit disftances to other guesses.
 build_tuple_val_list(List) when length(List) == 0 -> [];
 build_tuple_val_list(List) ->
   [element(2, hd(List)) | build_tuple_val_list(tl(List))].
 
+%% @doc simple function that returns the minimnum value in a list.
+%% @param List, List that contains an min value.
+%% @return Number (int) that is the minimum value in the specified list.
 get_min_val(List) ->
   lists:min(build_tuple_val_list(List)).
 
+%% @doc Function that takes the minimum tuple and converts it to a list
+%% @param List, List of Guesses
+%% @param MinVal, minimum edit distance of Guesses.
+%% @return List containing the Chosen Guess and the correlated minimnum edit distance.
 make_min_tuple_list(List, MinVal) ->
   if length(List) =:= 0 -> [];
     element(2, hd(List)) == MinVal -> [hd(List)] ++ make_min_tuple_list(tl(List), MinVal);
     true -> make_min_tuple_list(tl(List), MinVal)
   end.
 
+%% @doc Function that returns the tuple that contains the minimum edit distance.
+%% @param List, list of tuples that conatins one minium tuple value
+%% @return The tuple containing the minimum edit distance.
 get_min_tuple(List) ->
   MinVal = get_min_val(List),
   TupleLst = make_min_tuple_list(List, MinVal),
   R0 = rand:uniform(length(TupleLst)),
   lists:nth(R0, TupleLst).
 
+%% @doc Takes in the List of Guesses, and recursively iterates through each guess while calling helper functions to
+%% build the edit distance tuples containing a Guess and its sum edit distance to the other Guesses.
+%% @param [], Empty List Check
+%% @param OutList, The List that is oputputed containiing a list of tuples with guesses and correspoinding edit distances.
+%% @param FullList, Copy of the full list of guesses for the edit distance algorthim to reference for each guess while
+%% iterating through the original List.
+%% @return List of Tuples containing each guess and its corresponding sum edit distance to the other guesses.
 build_edit_distance_tuples([], OutList, FullList) ->
   FullList,
   OutList;
@@ -85,7 +119,10 @@ build_edit_distance_tuples([E1 | EN], OutList, FullList) ->
   Out = lists:append(OutList, [{E1, count_edit_distances(E1, FullList)}]),
   build_edit_distance_tuples(EN, Out, FullList).
 
-%% @doc Pick/generate a Wordle guess from a list of several guesses.
+%% @doc Pick/generate a Wordle guess from a list of several guesses based on minimum edit distance from all other guesses.
+%% Main function that begins and ends guess_arbiter.
+%% @param [Guess | NextGuess], List of inputted guesses for the round.
+%% @return The Chosen Guess of the round to be sent to the wordle game to be compared to the answer.
 choose_guess([Guess | NextGuess]) ->
 
   EList1 = [],
