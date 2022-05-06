@@ -4,6 +4,18 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
+get_min_val_test()  ->
+  Check = grdl_guess_arbiter:get_min_val([{"bread", 10}, {"table", 9}, {"movie", 8}]),
+  ?assertEqual(8, Check).
+
+build_tuple_val_list_test() ->
+  Check = grdl_guess_arbiter:build_tuple_val_list([{"bread", 10}, {"table", 9}, {"movie", 9}]),
+  ?assertMatch("\n\t\t", Check).
+
+make_min_tuple_list_test()  ->
+  Check = grdl_guess_arbiter:make_min_tuple_list([{"bread", 10}, {"table", 9}, {"movie", 8}], 8),
+  ?assertMatch([{"movie", 8}], Check).
+
 get_min_tuple_test()  ->
   CorrectAnswer = {"table", 4},
   List = [{"bread", 10}, {"table", 4}, {"movie", 16}],
