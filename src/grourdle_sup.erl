@@ -9,7 +9,9 @@ start_link() ->
 	supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 %% @doc initialize children templates in a one-for-one scheme, max one restart per 3 sec
-%% Child specs include one @see grdl_sess_pool_sup and one @see grdl_game_pool_sup
+%% Child specs include a grdl_sess_pool_sup and a grdl_game_pool_sup
+%% @see grdl_sess_pool_sup
+%% @see grdl_game_pool_sup
 init([]) ->
 	MaxR = 1,
 	MaxT = 3000,

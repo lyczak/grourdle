@@ -81,9 +81,10 @@ websocket_info(_Info, State) ->
 
 %% @doc handle a ws message to start a new session
 %% Takes map mapping start_session atom to true along with undefined session server pid.
-%% Starts a new session via @see grdl_sess_pool_serv:start_session/0, creates a new
+%% Starts a new session via grdl_sess_pool_serv, creates a new
 %% monitor, replies with ws message session_bound and the session id. Updates the state
 %% with the new session server pid and monitor reference.
+%% @see grdl_sess_pool_serv:start_session/0
 handle_message(#{start_session := true}, S = #state{sess_pid = undefined}) ->
   {ok, Pid, SessId} = grdl_sess_pool_serv:start_session(),
   io:format("ws_handler start new session with SessId: ~p~n", [SessId]),
@@ -96,8 +97,8 @@ handle_message(#{start_session := true}, S = #state{sess_pid = undefined}) ->
 %% @doc handle a ws message to bind to an existing session
 %% Takes map mapping bind_session atom to a session id along with undefined
 %% session server pid in the state. Tries to bind to the session via
-%% @see grdl_sess_pool_serv:get_session/1. Creates a new
-%% monitor, replies with ws message session_bound and the session id.
+%% @see grdl_sess_pool_serv:get_session/1
+%% Creates a new monitor, replies with ws message session_bound and the session id.
 %% Updates the state with the new session server pid and monitor reference.
 %% If the session id is invalid, this process will crash and the socket will close.
 handle_message(#{bind_session := SessId}, S = #state{sess_pid = undefined}) ->
