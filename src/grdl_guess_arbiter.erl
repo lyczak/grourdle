@@ -1,6 +1,8 @@
 -module(grdl_guess_arbiter).
 
--export([choose_guess/1]).
+-export([choose_guess/1, edit_distance/2, list_to_variable/2, count_edit_distances/2, get_min_tuple/1, build_tuple_val_list/1, make_min_tuple_list/2, get_min_val/1]).
+
+
 
 
 

@@ -1,7 +1,7 @@
 -module(answer_picker).
 
 %% API
--export([pick_answer/0]).
+-export([pick_answer/0, make_list/0, binary_list_to_string_list/1]).
 
 %% @doc takes a list of binary values and turns the list into all strings
 %% @param a list of binary values, BinaryList
