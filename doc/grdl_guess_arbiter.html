@@ -14,10 +14,23 @@
 
 
 <h2><a name="index">Function Index</a></h2>
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#choose_guess-1">choose_guess/1</a></td><td>Pick/generate a Wordle guess from a list of several guesses based on minimum relative edit distance.</td></tr>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#build_tuple_val_list-1">build_tuple_val_list/1</a></td><td>Builds a list of tuples containing each guess and the sum of edit distances to the other guesses.</td></tr>
+<tr><td valign="top"><a href="#choose_guess-1">choose_guess/1</a></td><td>Pick/generate a Wordle guess from a list of several guesses based on minimum relative edit distance.</td></tr>
+<tr><td valign="top"><a href="#count_edit_distances-2">count_edit_distances/2</a></td><td>Takes in one players guess, and sums the edit distances to each of the other guesses.</td></tr>
+<tr><td valign="top"><a href="#edit_distance-2">edit_distance/2</a></td><td>Calculates the editdistance from one string to another by calculating the number of character insertions, deletions, and moves it takes to change the first string to the second.</td></tr>
+<tr><td valign="top"><a href="#get_min_tuple-1">get_min_tuple/1</a></td><td>Function that returns the tuple that contains the minimum edit distance.</td></tr>
+<tr><td valign="top"><a href="#get_min_val-1">get_min_val/1</a></td><td>simple function that returns the minimnum value in a list.</td></tr>
+<tr><td valign="top"><a href="#list_to_variable-2">list_to_variable/2</a></td><td>Takes in a list that is recursively defined and assigns it to a variable.</td></tr>
+<tr><td valign="top"><a href="#make_min_tuple_list-2">make_min_tuple_list/2</a></td><td>Function that takes the minimum tuple and converts it to a list.</td></tr>
 </table>
 
 <h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="build_tuple_val_list-1">build_tuple_val_list/1</a></h3>
+<div class="spec">
+<p><tt>build_tuple_val_list(List) -&gt; any()</tt></p>
+<p> </p>
+</div><p>Builds a list of tuples containing each guess and the sum of edit distances to the other guesses.</p>
 
 <h3 class="function"><a name="choose_guess-1">choose_guess/1</a></h3>
 <div class="spec">
@@ -25,6 +38,44 @@
 <p> </p>
 </div><p>Pick/generate a Wordle guess from a list of several guesses based on minimum relative edit distance.
   This function wraps the below one, for the case where the guesses are binaries.</p>
+
+<h3 class="function"><a name="count_edit_distances-2">count_edit_distances/2</a></h3>
+<div class="spec">
+<p><tt>count_edit_distances(G, NextGuess) -&gt; any()</tt></p>
+<p> </p>
+</div><p>Takes in one players guess, and sums the edit distances to each of the other guesses.</p>
+
+<h3 class="function"><a name="edit_distance-2">edit_distance/2</a></h3>
+<div class="spec">
+<p><tt>edit_distance(First, Second) -&gt; any()</tt></p>
+<p> </p>
+</div><p>Calculates the editdistance from one string to another by calculating the number of character insertions, deletions, and moves it takes to change the first string to the second.
+  The edit_distance function itself calls compare on the the parameter strings to compare the character changes from the first string to the second string.</p>
+
+<h3 class="function"><a name="get_min_tuple-1">get_min_tuple/1</a></h3>
+<div class="spec">
+<p><tt>get_min_tuple(List) -&gt; any()</tt></p>
+<p> </p>
+</div><p>Function that returns the tuple that contains the minimum edit distance.</p>
+
+<h3 class="function"><a name="get_min_val-1">get_min_val/1</a></h3>
+<div class="spec">
+<p><tt>get_min_val(List) -&gt; any()</tt></p>
+<p> </p>
+</div><p>simple function that returns the minimnum value in a list.</p>
+
+<h3 class="function"><a name="list_to_variable-2">list_to_variable/2</a></h3>
+<div class="spec">
+<p><tt>list_to_variable(EN, OutList) -&gt; any()</tt></p>
+<p> </p>
+</div><p>Takes in a list that is recursively defined and assigns it to a variable.
+  Servers mostly an organizational purpose for creating a variable that contains a list of the current rounds guesses.</p>
+
+<h3 class="function"><a name="make_min_tuple_list-2">make_min_tuple_list/2</a></h3>
+<div class="spec">
+<p><tt>make_min_tuple_list(List, MinVal) -&gt; any()</tt></p>
+<p> </p>
+</div><p>Function that takes the minimum tuple and converts it to a list</p>
 <hr>
 
 <div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
