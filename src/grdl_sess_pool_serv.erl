@@ -25,7 +25,7 @@ start_session() ->
 
 %% @doc retrieve a session server with session server ID
 %% @param SessId session id
-%% @return returns {ok, SessionServerPid} or if not found returns {error, session_not_found, SessId}
+%% @returns {ok, SessionServerPid} or if not found returns {error, session_not_found, SessId}
 get_session(SessId) ->
   gen_server:call(?SERVER, {get_session, SessId}).
 
@@ -35,7 +35,7 @@ get_session(SessId) ->
 
 %% @doc initiate a pool supervisor
 %% @param {PoolSup} Pid
-%% @return {ok, #state{refs = gb_sets:empty()}}
+%% @returns {ok, #state{refs = gb_sets:empty()}}
 init({PoolSup}) ->
   self() ! {start_server_supervisor, PoolSup},
   {ok, #state{refs = gb_sets:empty()}}.
@@ -44,7 +44,7 @@ init({PoolSup}) ->
 %% @doc @see start_session/0
 %% start a new session server, generate a new id code, update the state and return
 %% @param message = {start_session}, state
-%% @return reply to caller with {ok, Pid, gameId}, update state, add a monitor
+%% @returns reply to caller with {ok, Pid, gameId}, update state, add a monitor
 handle_call({start_session}, _From, S = #state{sup = Sup, smap = SMap, refs = Refs}) ->
   SessId = grdl_utils:unique_base64_id(?IDLENGTH, SMap),
   io:format("sess_pool_serv spawning sess_serv~n"),
@@ -57,7 +57,7 @@ handle_call({start_session}, _From, S = #state{sup = Sup, smap = SMap, refs = Re
 %% @doc @see get_session/1
 %% get a session from the map of games and return it or return error if not found
 %% @param message {get_session, SessId}, State
-%% @return reply {reply, {ok, Pid}, S} if sess found or {reply, {error, game_not_found, SessId}, S} if sess not found
+%% @returns reply {reply, {ok, Pid}, S} if sess found or {reply, {error, game_not_found, SessId}, S} if sess not found
 handle_call({get_session, SessId}, _From, S = #state{smap = SMap}) ->
   io:format("sess_pool_serv handle_call get_session~n"),
   case maps:find(SessId, SMap) of
@@ -68,14 +68,14 @@ handle_call({get_session, SessId}, _From, S = #state{smap = SMap}) ->
 
 %% @doc reply ok to call requests that have not been overriden
 %% @param State
-%% @return {reply, ok, State}
+%% @returns {reply, ok, State}
 handle_call(_Request, _From, State = #state{}) ->
   {reply, ok, State}.
 
 % cast
 %% @doc noreply to cast requests that have not been overriden
 %% @param State
-%% @return {noreply, State}
+%% @returns {noreply, State}
 handle_cast(_Request, State = #state{}) ->
   {noreply, State}.
 
@@ -83,7 +83,7 @@ handle_cast(_Request, State = #state{}) ->
 %% @doc handle process monitor down signal
 %% this means one of the game servers went down
 %% @param {'DOWN', Ref, process, Pid, _} , State
-%% @return noreply, updated state with game server removed
+%% @returns noreply, updated state with game server removed
 handle_info({'DOWN', Ref, process, Pid, _}, S = #state{refs = Refs, smap = SMap}) ->
   case gb_sets:is_element(Ref, Refs) of
     true ->
@@ -100,7 +100,7 @@ handle_info({'DOWN', Ref, process, Pid, _}, S = #state{refs = Refs, smap = SMap}
 %% @doc start the server supervisor after us and our supervisor have initialized
 %% server supervisor should be a child of our parent pool supervisor
 %% @param message {start_server_supervisor, PoolSup}, State
-%% @return updated state
+%% @returns updated state
 handle_info({start_server_supervisor, PoolSup}, S = #state{}) ->
   io:format("sess_pool_serv starting sess_serv_sup state: ~p~n", [S]),
   {ok, Pid} = supervisor:start_child(PoolSup, {
@@ -117,20 +117,20 @@ handle_info({start_server_supervisor, PoolSup}, S = #state{}) ->
 
 %% @doc handle generic info call
 %% @param State
-%% @return {noreply, State}
+%% @returns {noreply, State}
 handle_info(_Info, State = #state{}) ->
   {noreply, State}.
 
 % etc
 %% @doc boilerplate terminate
 %% @param State
-%% @return ok
+%% @returns ok
 terminate(_Reason, _State = #state{}) ->
   ok.
 
 %% @doc boilerplate code change
 %% @param State
-%% @return {ok, State}
+%% @returns {ok, State}
 code_change(_OldVsn, State = #state{}, _Extra) ->
   {ok, State}.
 
