@@ -4,9 +4,14 @@
 -export([start_link/0]).
 -export([init/1]).
 
+%% @doc spawn and link to new grourdle_sup
 start_link() ->
 	supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
+%% @doc initialize children templates in a one-for-one scheme, max one restart per 3 sec
+%% Child specs include a grdl_sess_pool_sup and a grdl_game_pool_sup
+%% @see grdl_sess_pool_sup
+%% @see grdl_game_pool_sup
 init([]) ->
 	MaxR = 1,
 	MaxT = 3000,

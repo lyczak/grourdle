@@ -5,7 +5,11 @@
 -export([stop/1]).
 
 
-
+%% @doc Starts the Grourdle Application by initiating the server handling session for the Grourdle App.
+%% @param _Type, tpye of session to be initiated.
+%% @param _Args, arguments for the Application to start correctly.
+%% @returns grourdle_sup:start_linke()., after initiating the server session, the function ends by calling
+%% the start link function in grourdle_sup.
 start(_Type, _Args) ->
 	Dispatch = cowboy_router:compile([
 		{'_', [
@@ -20,6 +24,8 @@ start(_Type, _Args) ->
 		#{env => #{dispatch => Dispatch}}
 	),
 	grourdle_sup:start_link().
-
+%% @doc Quick Function to stop the current state of the Application client/server session.
+%% @param _State, the state of the Application.
+%% @returns ok., a terminating atom.
 stop(_State) ->
 	ok.
