@@ -3,7 +3,7 @@
 -export([get_answer/0, check_guess/2]).
 %% @doc Reads from the possible_answers.json file which contains all of the possible correct answers for wordle.
 %% Reads the json file answers and stores them in a list.
-%% @return P, list of possible answers.
+%% @returns P, list of possible answers.
 make_answers_list() ->
   PrivDir = case code:priv_dir(grourdle) of
     {error, bad_name} ->
@@ -15,7 +15,7 @@ make_answers_list() ->
   jsx:decode(File).
 
 %% @doc Reads the list of possible answers and converts the randomly chosen answer from binary to a list (Erlang string).
-%% @return binary_to_list(list:nth(RO, List))., function that returns the randomly selected binary answer to a string as an Erlang list.
+%% @returns binary_to_list(list:nth(RO, List))., function that returns the randomly selected binary answer to a string as an Erlang list.
 get_answer() ->
   List = make_answers_list(),
   R0 = rand:uniform(length(List)),
@@ -51,7 +51,7 @@ check_guess(Guess, Word) ->
 %% @param Index, the index that corresponds to the character in both the guess and the correct answer.
 %% @param Word, the correct answer for the comparison to be made.
 %% @param Result, which is ether set to green or not changed, with the index of the character and the Guess and the Correct Word.
-%% @return Either a tuple containing {Guess, Word, green} or the original resulting character color. Returns the check
+%% @returns Either a tuple containing {Guess, Word, green} or the original resulting character color. Returns the check
 %% for the green case.
 check_for_green(Guess, Index, Word, Result) ->
   case Index > length(Word) of
@@ -71,7 +71,7 @@ check_for_green(Guess, Index, Word, Result) ->
 %% @param Index, the index that corresponds to the character in both the guess and the correct answer.
 %% @param Word, the correct answer for the comparison to be made.
 %% @param Result, which is ether set to yellow or not changed, with the index of the character and the Guess and the Correct Word.
-%% @return Either a tuple containing {Guess, Word, yellow} or the original resulting character color. Returns the check
+%% @returns Either a tuple containing {Guess, Word, yellow} or the original resulting character color. Returns the check
 %% for the yellow case.
 check_for_yellow(Guess, Index, Word, Result) ->
   case Index > length(Word) of
