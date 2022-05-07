@@ -22,38 +22,49 @@
 %%% API
 %%%===================================================================
 
-% start and link to a new game server
+%% @doc start and link to a new game server.
 start_link() ->
   gen_server:start_link(?MODULE, [], []).
 
-% make the calling session process the owner of this game server
-% there are certain actions that only the owner can perform
+%% @doc make the calling session process the owner of this game server.
+%% there are certain actions that only the owner can perform.
+%% @param takes the PID of the server linked above.
+%% When the request is received, the gen_server calls handle_call({bind_to_session}...).
 bind_to_owner(GsPid) ->
   gen_server:call(GsPid, {bind_to_session}).
 
-% join the calling session process into this game server
-% do not call this from the owner session, instead use bind_to_owner
+%% @doc join the calling session process into this game server.
+%% do not call this from the owner session, instead use bind_to_owner.
+%% When the request is received, the gen_server calls handle_call({join_game}...).
 join_game(GsPid) ->
   gen_server:call(GsPid, {join_game}).
 
-% remove the calling session process from this game server.
-% any session can call this but if the owner leaves, it will terminate the game server
+%% @doc remove the calling session process from this game server.
+%% any session can call this but if the owner leaves, it will terminate the game server.
+%% @param takes the PID of the server linked above and a Reason for leaving the game.
+%% When the request is received, the gen_server calls handle_call({leave_game}...).
 leave_game(GsPid, Reason) ->
   gen_server:call(GsPid, {leave_game, Reason}).
 
-% transition from the waiting state to start a new game.
-% only the owner session can call this.
+%% @doc transition from the waiting state to start a new game.
+%% only the owner session can call this.
+%% @param takes the PID of the server linked above.
+%% When the request is received, the gen_server calls handle_call({start_game}...).
 start_game(GsPid) ->
   gen_server:call(GsPid, {start_game}).
 
-% submit a guess on behalf of the calling session process.
-% existing guesses will not be changed.
-% this should only be called during an active round.
+%% @doc submit a guess on behalf of the calling session process.
+%% existing guesses will not be changed.
+%% this should only be called during an active round.
+%% @param takes the PID of the server linked above and the Guess.
+%% When the request is received, the gen_server calls handle_call({submit_guess, Guess}...).
 submit_guess(GsPid, Guess) ->
   gen_server:call(GsPid, {submit_guess, Guess}).
 
-% end the current round by choosing a guess and evaluating it
-% against the secret word. this should only be called during an active round.
+%% @doc end the current round by choosing a guess and evaluating it
+%% against the secret word. this should only be called during an active round.
+%% @param takes the PID of the server linked above.
+%% When the request is received, the gen_server calls handle_call({end_round}...).
 end_round(GsPid) ->
   gen_server:call(GsPid, {end_round}).
 
@@ -61,7 +72,9 @@ end_round(GsPid) ->
 %%% gen_server
 %%%===================================================================
 
-% initialize the state of a new game server
+%% @doc initialize the state of a new game server.
+%% @param list of variables needed to initialization (if needed).
+%% @returns tuple of initialized variables for the game.
 init([]) ->
   {ok, #state{
     sess = #{},
@@ -70,10 +83,12 @@ init([]) ->
     board_guesses = [],
     round_guesses = #{}}}.
 
-% == calls ==
+%% == calls ==
 
-% see bind_to_owner/1
-% create a new monitor and add it to the sess refs. add owner pid to state
+%% @see bind_to_owner/1.
+%% @doc create a new monitor and add it to the sess refs. add owner pid to state.
+%% @param message {bind_to_session}, {SsPid, _Tag}, and state S = #state{sess = Refs}.
+%% @returns a tuple {reply,Reply,State} -> {reply, ok, S#state...}.
 handle_call({bind_to_session}, {SsPid, _Tag}, S = #state{sess = Refs}) ->
   Ref = erlang:monitor(process, SsPid),
   {reply, ok, S#state{
@@ -81,9 +96,11 @@ handle_call({bind_to_session}, {SsPid, _Tag}, S = #state{sess = Refs}) ->
     sess = Refs#{SsPid => Ref}
   }};
 
-% see join_game/1
-% create a new monitor and add it to the sess refs.
-% tells all users a user has joined
+%% @see join_game/1.
+%% @doc create a new monitor and add it to the sess refs.
+%% tells all users a user has joined.
+%% @param message {join_game}, {Pid, _Tag}, and state S1 = #state{sess = Refs}.
+%% @returns a tuple {reply,Reply,State} -> {reply, ok, S2}.
 handle_call({join_game}, {Pid, _Tag}, S1 = #state{sess = Refs}) ->
   Ref = erlang:monitor(process, Pid),
   UserCount = maps:size(Refs) + 1,
@@ -94,9 +111,11 @@ handle_call({join_game}, {Pid, _Tag}, S1 = #state{sess = Refs}) ->
   send_game_state(Pid, S2),
   {reply, ok, S2};
 
-% see leave_game/1
-% remove existing monitor and sess pid entry
-% tells all users a user has left
+%% @see leave_game/1.
+%% @doc remove existing monitor and sess pid entry.
+%% tells all users a user has left.
+%% @param message {leave_game}, {Pid, _Tag}, and state S = #state{sess = Refs}.
+%% @returns a tuple {reply,Reply,State} -> {reply, ok, S#state...}.
 handle_call({leave_game}, {Pid, _Tag}, S = #state{sess = Refs}) ->
   Ref = maps:get(Pid, Refs),
   erlang:demonitor(Ref),
@@ -106,9 +125,11 @@ handle_call({leave_game}, {Pid, _Tag}, S = #state{sess = Refs}) ->
     sess = maps:remove(Ref, Refs)
   }};
 
-% see start_game/1
-% only run when called by owner and game state is waiting.
-% set game_state to active, clear board and round guesses
+%% @see start_game/1.
+%% @doc only run when called by owner and game state is waiting.
+%% set game_state to active, clear board and round guesses.
+%% @param message {start_game}, {Pid, _Tag}, and state S = #state{owner = Owner, game_state = waiting}).
+%% @returns a tuple {reply,Reply,State} -> {reply, ok, S#state...}.
 handle_call({start_game}, {Pid, _Tag},
     S = #state{owner = Owner, game_state = waiting})
   when Pid == Owner orelse Pid == self() ->
@@ -122,9 +143,11 @@ handle_call({start_game}, {Pid, _Tag},
     round_guesses = #{}
   }};
 
-% see submit_guess/2
-% if session's guess not exists, add it
-% tells all users a guess has been submitted
+%% @see submit_guess/2.
+%% @doc if session's guess not exists, add it.
+%% tells all users a guess has been submitted.
+%% @param message {submit_guess, Guess}, {Pid, _Tag}, and state S = #state{sess = Sess, round_guesses = Round}).
+%% @returns a tuple {reply,Reply,State} -> {reply, ok, S#state...}.
 handle_call({submit_guess, Guess}, {Pid, _Tag}, S = #state{sess = Sess, round_guesses = Round}) ->
   case maps:find(Pid, Round) of
     {ok, _} ->
@@ -141,15 +164,23 @@ handle_call({submit_guess, Guess}, {Pid, _Tag}, S = #state{sess = Sess, round_gu
     }}
   end;
 
+%% @doc handles all other calls.
+%% @param message _Request,_From and state State = #state{}.
+%% @returns State = #state{}.
 handle_call(_Request, _From, State = #state{}) ->
   {reply, ok, State}.
 
-% casts
+%% @doc handles all casts - asynchronous requests.
+%% @param message _Request and state State = #state{}.
+%% @returns {noreply, State}.
 handle_cast(_Request, State = #state{}) ->
   {noreply, State}.
 
-% etc
-
+%% @see end_round/1.
+%% @doc handle everything needed for ending a round.
+%% for both wins and losses.
+%% @param message {end_round} that signals the end of the round.
+%% @returns a tuple {noreply, State1} -> {noreply, S#state...}.
 handle_info({end_round},
     S = #state{word = Word, board = Board, board_guesses = BoardGuesses, round_guesses = Round}) ->
   Guesses = maps:values(Round),
@@ -175,7 +206,9 @@ handle_info({end_round},
       }}
   end;
 
-%ends the game by setting game_state to waiting, informs all users
+%% @doc ends the game by setting game_state to waiting, informs all users.
+%% @param a message {end_game, Reason} that includes the reason for ending.
+%% @returns a tuple {noreply, State1} -> {noreply, S#state...}.
 handle_info({end_game, Reason},
     S = #state{board = Board, game_state = active}) ->
   io:format("game_serv ending game for reason ~p~n", [Reason]),
@@ -184,6 +217,9 @@ handle_info({end_game, Reason},
     game_state = waiting
   }};
 
+%% @doc handles when the owner of the game leaves.
+%% @param a message {'DOWN', _Ref, process, Pid, _}, and a state S = #state{owner = Owner, sess = Sess}.
+%% @returns a tuple {noreply, State} -> {noreply, NewState} or {noreply, S}.
 handle_info({'DOWN', _Ref, process, Pid, _}, S = #state{owner = Owner, sess = Sess}) ->
   case Pid of
     Owner ->
@@ -200,12 +236,21 @@ handle_info({'DOWN', _Ref, process, Pid, _}, S = #state{owner = Owner, sess = Se
       end
   end;
 
+%% @doc catchall to handle other info messages.
+%% @param takes a message and a state _Info, State = #state{}.
+%% returns {noreply, State}.
 handle_info(_Info, State = #state{}) ->
   {noreply, State}.
 
+%% @doc terminate function.
+%% @param takes a reason as a message and a state: _Reason, _State = #state{}.
+%% @returns ok.
 terminate(_Reason, _State = #state{}) ->
   ok.
 
+%% @doc handling code changes.
+%% @param takes ethe older version as a message, a state, and anything extra.
+%% @returns a tuple with a state {ok, State}.
 code_change(_OldVsn, State = #state{}, _Extra) ->
   {ok, State}.
 
@@ -213,13 +258,17 @@ code_change(_OldVsn, State = #state{}, _Extra) ->
 %%% Internal functions
 %%%===================================================================
 
-%%helper func that given state and message, messages all session servers
+%% @doc helper func that given state and message, messages all session servers.
+%% @param a message to broadcast and a state: Msg, _S = #state{sess = Sess}.
+%% @returns ok.
 broadcast(Msg, _S = #state{sess = Sess}) ->
   maps:foreach(fun(Pid,_) -> grdl_sess_serv:send_message(Pid, Msg) end, Sess),
   ok.
 
-%% sends some information about the current game state to a given session
-%% used when the user's session is presumed to be out-of-sync with the game state
+%% @doc sends some information about the current game state to a given session.
+%% used when the user's session is presumed to be out-of-sync with the game state.
+%% @param a PID - process id, and a state: Pid, _S = #state...
+%% @returns ok.
 send_game_state(Pid, _S = #state{
   game_state = GState,
   sess = Sess,

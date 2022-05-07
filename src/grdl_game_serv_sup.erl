@@ -3,13 +3,15 @@
 
 -export([start_link/0, init/1]).
 
-% spawn and link to a new game server supervisor
+%% @doc spawn and link to a new game server supervisor.
 start_link() ->
   io:format("game_serv_sup start_link pid: ~p~n", [self()]),
   supervisor:start_link(?MODULE, []).
 
-% initialize a game server supervisor with a game server child spec
-% the game servers will be added dynamically by the pool server
+%% @doc initialize a game server supervisor with a game server child spec.
+%% the game servers will be added dynamically by the pool server.
+%% @param takes initialization values, if any.
+%% @returns a tuple with supervisor information.
 init([]) ->
   MaxR = 1,
   MaxT = 3000,
