@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Module grdl_sess_serv</title>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" title="EDoc">
+</head>
+<body bgcolor="white">
+<div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<hr>
+
+<h1>Module grdl_sess_serv</h1>
+<ul class="index"><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>
+
+<p><b>Behaviours:</b> <a href="gen_server.html"><tt>gen_server</tt></a>.</p>
+
+<h2><a name="index">Function Index</a></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#bind_to_ws-2">bind_to_ws/2</a></td><td>bind a session server to a given websocket handler
+  Binding should occur directly after the session server is initialized.</td></tr>
+<tr><td valign="top"><a href="#code_change-3">code_change/3</a></td><td>handle new code version loaded at runtime.</td></tr>
+<tr><td valign="top"><a href="#handle_call-3">handle_call/3</a></td><td>bind to a websocket
+  Create a new monitor to the websocket and update the state
+  with that monitor and the ws_handler's Pid.</td></tr>
+<tr><td valign="top"><a href="#handle_cast-2">handle_cast/2</a></td><td>respond to a websocket sess_echo message
+  Takes message with sess_echo atom mapped to a string, logs to console,
+  replies with sess_echo event message to the ws_handler.</td></tr>
+<tr><td valign="top"><a href="#handle_info-2">handle_info/2</a></td><td>handle down message (presumably from one of the monitors we created)
+  Takes a 'DOWN' message, along with g_pid and ws_pid in state.</td></tr>
+<tr><td valign="top"><a href="#handle_message-2">handle_message/2</a></td><td>asynchronously handle a new message from a websocket handler
+  Messages are expected to be formatted according to the map syntax of the JSX library.</td></tr>
+<tr><td valign="top"><a href="#init-1">init/1</a></td><td>initialize a new sess_serv (via gen_server callback) with a given session id
+  Initialize the state with said session id.</td></tr>
+<tr><td valign="top"><a href="#send_message-2">send_message/2</a></td><td>pass a websocket message along to the given websocket handler
+  Because other processes do not have direct access to websocket
+  handlers, it may be necessary for us to proxy websocket messages through a session server
+  which internally keeps track of the ws_handler pid in its state.</td></tr>
+<tr><td valign="top"><a href="#start_link-1">start_link/1</a></td><td>spawn and link to a new session server with a given session id.</td></tr>
+<tr><td valign="top"><a href="#terminate-2">terminate/2</a></td><td>cleanly terminate this session server.</td></tr>
+</table>
+
+<h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="bind_to_ws-2">bind_to_ws/2</a></h3>
+<div class="spec">
+<p><tt>bind_to_ws(SsPid, WsPid) -&gt; any()</tt></p>
+<p> </p>
+</div><p>bind a session server to a given websocket handler
+  Binding should occur directly after the session server is initialized. This will
+  establish a line of communication whereby the the session can pass along messages
+  to the websocket handler to be sent to a web-browser client.</p>
+<p><b>See also:</b> <a href="grdl_ws_handler.html">grdl_ws_handler</a>.</p>
+
+<h3 class="function"><a name="code_change-3">code_change/3</a></h3>
+<div class="spec">
+<p><tt>code_change(OldVsn, State, Extra) -&gt; any()</tt></p>
+<p> </p>
+</div><p>handle new code version loaded at runtime</p>
+
+<h3 class="function"><a name="handle_call-3">handle_call/3</a></h3>
+<div class="spec">
+<p><tt>handle_call(Request, From, S) -&gt; any()</tt></p>
+<p> </p>
+</div><p>bind to a websocket
+  Create a new monitor to the websocket and update the state
+  with that monitor and the ws_handler's Pid</p>
+<p><b>See also:</b> <a href="#bind_to_ws-2">bind_to_ws/2</a>.</p>
+
+<h3 class="function"><a name="handle_cast-2">handle_cast/2</a></h3>
+<div class="spec">
+<p><tt>handle_cast(Request, State) -&gt; any()</tt></p>
+<p> </p>
+</div><p>respond to a websocket sess_echo message
+  Takes message with sess_echo atom mapped to a string, logs to console,
+  replies with sess_echo event message to the ws_handler. State is unchanged</p>
+<p><b>See also:</b> <a href="#handle_message-2">handle_message/2</a>.</p>
+
+<h3 class="function"><a name="handle_info-2">handle_info/2</a></h3>
+<div class="spec">
+<p><tt>handle_info(Info, S) -&gt; any()</tt></p>
+<p> </p>
+</div><p>handle down message (presumably from one of the monitors we created)
+  Takes a 'DOWN' message, along with g_pid and ws_pid in state.
+  Matches on the Pid of the downed process. Sends game_unbound ws message if
+  the game has gone down and kills self normally if the ws handler has gone down.</p>
+
+<h3 class="function"><a name="handle_message-2">handle_message/2</a></h3>
+<div class="spec">
+<p><tt>handle_message(SsPid, Msg) -&gt; any()</tt></p>
+<p> </p>
+</div><p>asynchronously handle a new message from a websocket handler
+  Messages are expected to be formatted according to the map syntax of the JSX library.
+  Messages correspond to events initiated by the web-browser client. These events can be
+  processed asynchronously and dont necessitate an immediate response or order-guarante.</p>
+<p><b>See also:</b> <a href="grdl_ws_handler.html">grdl_ws_handler</a>.</p>
+
+<h3 class="function"><a name="init-1">init/1</a></h3>
+<div class="spec">
+<p><tt>init(X1) -&gt; any()</tt></p>
+<p> </p>
+</div><p>initialize a new sess_serv (via gen_server callback) with a given session id
+  Initialize the state with said session id.</p>
+
+<h3 class="function"><a name="send_message-2">send_message/2</a></h3>
+<div class="spec">
+<p><tt>send_message(SsPid, Msg) -&gt; any()</tt></p>
+<p> </p>
+</div><p>pass a websocket message along to the given websocket handler
+  Because other processes do not have direct access to websocket
+  handlers, it may be necessary for us to proxy websocket messages through a session server
+  which internally keeps track of the ws_handler pid in its state. This function forwards a
+  message to be formatted by JSX and passed out the corresponding websocket.</p>
+<p><b>See also:</b> <a href="grdl_game_serv.html">grdl_game_serv</a>, <a href="grdl_ws_handler.html">grdl_ws_handler</a>.</p>
+
+<h3 class="function"><a name="start_link-1">start_link/1</a></h3>
+<div class="spec">
+<p><tt>start_link(SessId) -&gt; any()</tt></p>
+<p> </p>
+</div><p>spawn and link to a new session server with a given session id</p>
+
+<h3 class="function"><a name="terminate-2">terminate/2</a></h3>
+<div class="spec">
+<p><tt>terminate(Reason, State) -&gt; any()</tt></p>
+<p> </p>
+</div><p>cleanly terminate this session server</p>
+<hr>
+
+<div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<p><i>Generated by EDoc</i></p>
+</body>
+</html>

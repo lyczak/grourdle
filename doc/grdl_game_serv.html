@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Module grdl_game_serv</title>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" title="EDoc">
+</head>
+<body bgcolor="white">
+<div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<hr>
+
+<h1>Module grdl_game_serv</h1>
+<ul class="index"><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>
+
+<p><b>Behaviours:</b> <a href="gen_server.html"><tt>gen_server</tt></a>.</p>
+
+<h2><a name="index">Function Index</a></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#bind_to_owner-1">bind_to_owner/1</a></td><td>make the calling session process the owner of this game server.</td></tr>
+<tr><td valign="top"><a href="#code_change-3">code_change/3</a></td><td>handling code changes.</td></tr>
+<tr><td valign="top"><a href="#end_round-1">end_round/1</a></td><td>end the current round by choosing a guess and evaluating it
+  against the secret word.</td></tr>
+<tr><td valign="top"><a href="#handle_call-3">handle_call/3</a></td><td>create a new monitor and add it to the sess refs.</td></tr>
+<tr><td valign="top"><a href="#handle_cast-2">handle_cast/2</a></td><td>handles all casts - asynchronous requests.</td></tr>
+<tr><td valign="top"><a href="#handle_info-2">handle_info/2</a></td><td>handle everything needed for ending a round.</td></tr>
+<tr><td valign="top"><a href="#init-1">init/1</a></td><td>initialize the state of a new game server.</td></tr>
+<tr><td valign="top"><a href="#join_game-1">join_game/1</a></td><td>join the calling session process into this game server.</td></tr>
+<tr><td valign="top"><a href="#leave_game-2">leave_game/2</a></td><td>remove the calling session process from this game server.</td></tr>
+<tr><td valign="top"><a href="#start_game-1">start_game/1</a></td><td>transition from the waiting state to start a new game.</td></tr>
+<tr><td valign="top"><a href="#start_link-0">start_link/0</a></td><td>start and link to a new game server.</td></tr>
+<tr><td valign="top"><a href="#submit_guess-2">submit_guess/2</a></td><td>submit a guess on behalf of the calling session process.</td></tr>
+<tr><td valign="top"><a href="#terminate-2">terminate/2</a></td><td>terminate function.</td></tr>
+</table>
+
+<h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="bind_to_owner-1">bind_to_owner/1</a></h3>
+<div class="spec">
+<p><tt>bind_to_owner(GsPid) -&gt; any()</tt></p>
+<p> </p>
+</div><p>make the calling session process the owner of this game server.
+  there are certain actions that only the owner can perform.</p>
+
+<h3 class="function"><a name="code_change-3">code_change/3</a></h3>
+<div class="spec">
+<p><tt>code_change(OldVsn, State, Extra) -&gt; any()</tt></p>
+<p> </p>
+</div><p>handling code changes.</p>
+
+<h3 class="function"><a name="end_round-1">end_round/1</a></h3>
+<div class="spec">
+<p><tt>end_round(GsPid) -&gt; any()</tt></p>
+<p> </p>
+</div><p>end the current round by choosing a guess and evaluating it
+  against the secret word. this should only be called during an active round.</p>
+
+<h3 class="function"><a name="handle_call-3">handle_call/3</a></h3>
+<div class="spec">
+<p><tt>handle_call(Request, From, S) -&gt; any()</tt></p>
+<p> </p>
+</div><p>create a new monitor and add it to the sess refs. add owner pid to state.</p>
+<p><b>See also:</b> <a href="#bind_to_owner-1">bind_to_owner/1</a>.</p>
+
+<h3 class="function"><a name="handle_cast-2">handle_cast/2</a></h3>
+<div class="spec">
+<p><tt>handle_cast(Request, State) -&gt; any()</tt></p>
+<p> </p>
+</div><p>handles all casts - asynchronous requests.</p>
+
+<h3 class="function"><a name="handle_info-2">handle_info/2</a></h3>
+<div class="spec">
+<p><tt>handle_info(Info, S) -&gt; any()</tt></p>
+<p> </p>
+</div><p>handle everything needed for ending a round.
+  for both wins and losses.</p>
+<p><b>See also:</b> <a href="#end_round-1">end_round/1</a>.</p>
+
+<h3 class="function"><a name="init-1">init/1</a></h3>
+<div class="spec">
+<p><tt>init(X1) -&gt; any()</tt></p>
+<p> </p>
+</div><p>initialize the state of a new game server.</p>
+
+<h3 class="function"><a name="join_game-1">join_game/1</a></h3>
+<div class="spec">
+<p><tt>join_game(GsPid) -&gt; any()</tt></p>
+<p> </p>
+</div><p>join the calling session process into this game server.
+  do not call this from the owner session, instead use bind_to_owner.
+  When the request is received, the gen_server calls handle_call({join_game}...).</p>
+
+<h3 class="function"><a name="leave_game-2">leave_game/2</a></h3>
+<div class="spec">
+<p><tt>leave_game(GsPid, Reason) -&gt; any()</tt></p>
+<p> </p>
+</div><p>remove the calling session process from this game server.
+  any session can call this but if the owner leaves, it will terminate the game server.</p>
+
+<h3 class="function"><a name="start_game-1">start_game/1</a></h3>
+<div class="spec">
+<p><tt>start_game(GsPid) -&gt; any()</tt></p>
+<p> </p>
+</div><p>transition from the waiting state to start a new game.
+  only the owner session can call this.</p>
+
+<h3 class="function"><a name="start_link-0">start_link/0</a></h3>
+<div class="spec">
+<p><tt>start_link() -&gt; any()</tt></p>
+<p> </p>
+</div><p>start and link to a new game server.</p>
+
+<h3 class="function"><a name="submit_guess-2">submit_guess/2</a></h3>
+<div class="spec">
+<p><tt>submit_guess(GsPid, Guess) -&gt; any()</tt></p>
+<p> </p>
+</div><p>submit a guess on behalf of the calling session process.
+  existing guesses will not be changed.
+  this should only be called during an active round.</p>
+
+<h3 class="function"><a name="terminate-2">terminate/2</a></h3>
+<div class="spec">
+<p><tt>terminate(Reason, State) -&gt; any()</tt></p>
+<p> </p>
+</div><p>terminate function.</p>
+<hr>
+
+<div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<p><i>Generated by EDoc</i></p>
+</body>
+</html>

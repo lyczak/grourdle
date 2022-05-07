@@ -1,0 +1,6 @@
+%% encoding: UTF-8
+{application,''}.
+{modules,[answer_picker,grdl_game_pool_serv,grdl_game_pool_sup,grdl_game_serv,
+          grdl_game_serv_sup,grdl_guess_arbiter,grdl_sess_pool_serv,
+          grdl_sess_pool_sup,grdl_sess_serv,grdl_sess_serv_sup,grdl_utils,
+          grdl_wordle,grdl_ws_handler,grourdle_app,grourdle_sup]}.
