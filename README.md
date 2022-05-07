@@ -26,3 +26,7 @@ its because this was done as a final project for our
 2. `make run` from the root directory.
 3. Navigate to https://localhost:1312
 4. Open a few tabs and join the same game to play against some friends (or yourself).
+
+This project uses [Erlang.mk](https://erlang.mk) so releases can always be run using
+`make run`, tests can be run using `make tests`, and docs can be generated using
+`make docs`. HTML documentation can be found in the `docs` folder.
